@@ -117,6 +117,41 @@ h2 em { color: var(--muted); }
 .architecture-foot p { display: flex; gap: 12px; align-items: center; font-size: var(--small-text); line-height: 1.6; color: var(--muted); max-width: 730px; }
 .architecture-foot p svg { color: var(--green); }
 .architecture-foot button { flex-shrink: 0; }
+.implementation-band { background: var(--surface); border-top: 1px solid var(--line); }
+.implementation-intro { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+.implementation-subtitle { margin-top: 14px; font-family: 'Newsreader', Georgia, serif; font-size: 26px; line-height: 1.25; color: var(--muted); }
+.implementation-summary p { max-width: 550px; font-size: 15px; line-height: 1.75; color: var(--muted); }
+.implementation-summary .text-link { margin-top: 14px; color: var(--blue); }
+.implementation-map-heading { display: flex; justify-content: space-between; align-items: center; gap: 24px; margin-top: 40px; margin-bottom: 18px; }
+.implementation-map-heading h3 { font-size: 26px; line-height: 1.2; }
+.implementation-map-heading > span { font-size: var(--small-text); color: var(--muted); }
+.compatibility-scroll { position: relative; overflow: auto; overscroll-behavior-x: contain; border-block: 1px solid var(--line); }
+.compatibility-table { width: 100%; min-width: 850px; border-collapse: collapse; table-layout: fixed; font-size: var(--small-text); }
+.compatibility-table th, .compatibility-table td { padding: 16px 12px; line-height: 1.4; }
+.compatibility-table thead { background: #edf3f6; color: #24577f; }
+.compatibility-table thead th { font-weight: 600; text-align: center; }
+.compatibility-table th:first-child { width: 230px; text-align: left; padding-left: 20px; }
+.compatibility-table tbody tr { border-top: 1px solid var(--line); }
+.compatibility-table tbody th { font-weight: 500; }
+.compatibility-table tbody th span { display: block; }
+.compatibility-table small { display: block; font-size: var(--small-text); font-weight: 400; color: var(--muted); margin-top: 3px; }
+.compatibility-table td svg { display: block; margin: auto; width: 19px; height: 19px; }
+.widget-supported { color: var(--green); background: #f1f7f3; }
+.widget-unregistered { color: #a9b2b6; }
+.implementation-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.compatibility-note { display: flex; align-items: start; gap: 10px; color: var(--muted); font-size: var(--small-text); line-height: 1.6; margin-top: 14px; }
+.compatibility-note svg { color: var(--green); margin-top: 2px; }
+.implementation-package { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 36px; }
+.implementation-package > a { border-top: 1px solid var(--line); padding-top: 18px; min-width: 0; }
+.package-name { display: flex; align-items: center; gap: 10px; color: var(--blue); }
+.package-name code { font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.package-name svg:last-child { width: 15px; height: 15px; margin-left: auto; }
+.implementation-package strong { display: block; font-size: 15px; font-weight: 600; margin-top: 15px; }
+.implementation-package p { font-size: var(--small-text); color: var(--muted); line-height: 1.65; margin-top: 7px; }
+.implementation-package > a:hover { border-color: var(--blue); }
+.implementation-package > a:hover strong { color: var(--blue); }
+.implementation-host { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--line); font-size: var(--small-text); line-height: 1.7; color: var(--muted); }
+.implementation-host strong { color: var(--ink); font-weight: 500; }
 .practice-band { background: #edf1f0; border-block: 1px solid #d3dcd8; }
 .case-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; margin-top: 40px; }
 .case { min-width: 0; }
@@ -195,6 +230,12 @@ h2 em { color: var(--muted); }
   .layer-panel { min-height: 345px; }
   .layer-panel h3 { font-size: 29px; }
   .architecture-foot { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .implementation-intro { grid-template-columns: 1fr; gap: 22px; }
+  .implementation-subtitle { font-size: 24px; }
+  .implementation-map-heading { align-items: start; flex-direction: column; gap: 10px; margin-top: 30px; }
+  .compatibility-table th:first-child { width: 210px; }
+  .implementation-package { grid-template-columns: 1fr; gap: 22px; }
+  .implementation-package strong { margin-top: 10px; }
   .case-grid { gap: 24px; }
   .case h3 { font-size: 27px; line-height: 1.1; }
   .case-meta { align-items: start; flex-direction: column; }

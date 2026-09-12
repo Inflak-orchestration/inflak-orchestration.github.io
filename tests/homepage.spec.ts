@@ -15,6 +15,9 @@ test('loads real imagery with no runtime errors or horizontal overflow', async (
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
   expect(errors).toEqual([])
   await expect(page.getByRole('link', { name: 'Explore the gallery' })).toHaveAttribute('href', 'https://inflak-orchestration.github.io/Inflak-gallery/')
+  const menu = page.getByRole('button', { name: 'Open navigation', exact: true })
+  if (await menu.isVisible()) await menu.click()
+  await expect(page.getByRole('navigation').getByRole('link', { name: 'GitHub', exact: true })).toHaveAttribute('href', 'https://github.com/Inflak-orchestration/inflak-main')
 })
 
 test('architecture tabs support selection and keyboard navigation', async ({ page }) => {
@@ -30,6 +33,34 @@ test('architecture tabs support selection and keyboard navigation', async ({ pag
   await expect(router).toBeFocused()
   await page.getByRole('tab', { name: 'L3 Designer' }).click()
   await expect(page.getByRole('tabpanel')).toContainText('Semantic widget contract')
+})
+
+test('Inflak Main overview shows the registered planners, widgets, and source package', async ({ page }) => {
+  await page.goto('/#inflak-main')
+  const section = page.getByRole('region', { name: 'Inflak Main', exact: true })
+  await expect(section.getByRole('heading', { name: 'Inflak Main', exact: true })).toBeVisible()
+  await expect(page.locator('#architecture + #inflak-main + #in-practice')).toHaveCount(1)
+  await expect(section.locator('thead th')).toHaveText(['Task planner', 'Settings form', 'Option selector', 'Content editor', 'Structure editor', 'Canvas editor', 'Parameter controls'])
+  const rows = section.locator('tbody tr')
+  await expect(rows).toHaveCount(5)
+  for (const [index, name, supported] of [
+    [0, 'Writing draft', 2], [1, 'Writing revision', 3], [2, 'Prompt enhancement', 3],
+    [3, 'Image generation', 3], [4, 'Image editing', 4],
+  ] as const) {
+    await expect(rows.nth(index).getByRole('rowheader')).toContainText(name)
+    await expect(rows.nth(index).locator('.widget-supported')).toHaveCount(supported)
+  }
+  await expect(section.getByRole('link', { name: 'View Inflak Main on GitHub' })).toHaveAttribute('href', 'https://github.com/Inflak-orchestration/inflak-main')
+  for (const directory of ['skills', 'registry', 'contract']) {
+    await expect(section.locator(`a[href$="/tree/main/${directory}"]`)).toHaveCount(1)
+  }
+  await expect(section).toContainText('not a standalone agent application')
+  await page.setViewportSize({ width: 320, height: 800 })
+  const map = section.getByRole('region', { name: 'Planner and widget compatibility' })
+  await map.focus()
+  await page.keyboard.press('ArrowRight')
+  await expect.poll(() => map.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
 })
 
 test('example carousel loops, supports keyboard and dots, and keeps uniform image ratios', async ({ page }) => {
