@@ -136,9 +136,14 @@ h2 em { color: var(--muted); }
 .site-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-block: 27px; border-top: 1px solid var(--ink); }
 .site-footer .brand img { width: 106px; }
 .site-footer > p { font-size: var(--small-text); color: var(--muted); }
-.figure-dialog { width: min(1500px, calc(100% - 48px)); max-width: none; max-height: calc(100dvh - 48px); padding: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
-.figure-dialog::backdrop { background: rgb(23 27 34 / 70%); }
-.figure-dialog[open] { display: flex; flex-direction: column; }
+.figure-dialog, .video-dialog { width: min(1500px, calc(100% - 48px)); max-width: none; max-height: calc(100dvh - 48px); padding: 0; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--ink); }
+.figure-dialog::backdrop, .video-dialog::backdrop { background: rgb(23 27 34 / 70%); }
+.figure-dialog[open], .video-dialog[open] { display: flex; flex-direction: column; }
+.video-dialog { width: min(1200px, calc(100% - 48px)); }
+.video-dialog .dialog-header, .video-dialog .dialog-footer { flex-shrink: 0; }
+.video-stage { display: grid; place-items: center; min-height: 0; background: #15171c; }
+.video-stage video { display: block; width: 100%; min-height: 0; max-height: max(160px, calc(100dvh - 300px)); aspect-ratio: 16 / 9; object-fit: contain; }
+.video-status { flex-shrink: 0; padding: 10px 24px; font-size: var(--small-text); line-height: 1.5; color: var(--muted); }
 .dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 24px; border-bottom: 1px solid var(--line); }
 .dialog-header h2 { font-size: 30px; margin-top: 5px; }
 .figure-scroll { overflow: auto; min-height: 0; background: white; }
@@ -195,7 +200,7 @@ h2 em { color: var(--muted); }
   .case-meta { align-items: start; flex-direction: column; }
   .site-footer { flex-wrap: wrap; }
   .site-footer > p { order: 3; width: 100%; }
-  .figure-dialog { width: calc(100% - 20px); max-height: calc(100dvh - 20px); }
+  .figure-dialog, .video-dialog { width: calc(100% - 20px); max-height: calc(100dvh - 20px); }
   .dialog-header, .dialog-footer { padding: 16px; }
   .dialog-header h2 { font-size: 25px; }
   .dialog-footer { flex-wrap: wrap; gap: 12px; }

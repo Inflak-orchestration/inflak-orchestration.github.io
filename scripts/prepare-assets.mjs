@@ -2,13 +2,22 @@ import sharp from 'sharp'
 import { mkdir, copyFile } from 'node:fs/promises'
 import { resolve, join } from 'node:path'
 
-const [sourceArgument, logoArgument] = process.argv.slice(2)
+const [sourceArgument, logoArgument, widgetOverviewArgument] = process.argv.slice(2)
 if (!sourceArgument || !logoArgument) throw new Error('Usage: node scripts/prepare-assets.mjs <rendered-figure-directory> <logo.png>')
 const source = resolve(sourceArgument)
 const output = resolve('public/assets')
 await mkdir(output, { recursive: true })
 await copyFile(resolve(logoArgument), join(output, 'inflak-logo.png'))
-await sharp(logoArgument).resize(64, 64, { fit: 'contain', background: '#f5f3ee' }).png().toFile(join(output, 'favicon.png'))
+const logo = await sharp(logoArgument).metadata()
+const logoSymbol = await sharp(logoArgument)
+  .extract({ left: 0, top: 0, width: Math.round(logo.width * 0.48), height: logo.height })
+  .png().toBuffer()
+await sharp(logoSymbol)
+  .trim()
+  .ensureAlpha()
+  .resize(56, 56, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+  .extend({ top: 4, bottom: 4, left: 4, right: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } })
+  .png().toFile(join(output, 'favicon.png'))
 
 for (const [original, destination] of [['gallery_main', 'gallery-main'], ['gallery_collage', 'gallery-collage'], ['walkthrough_case', 'walkthrough']]) {
   await sharp(join(source, `${original}.png`)).webp({ quality: 90 }).toFile(join(output, `${destination}.webp`))
@@ -21,9 +30,23 @@ const story = await crop('gallery_main', { left: 293, top: 86, width: 307, heigh
 const form = await crop('gallery_main', { left: 2, top: 126, width: 286, height: 253 }, 300)
 const collage = await crop('gallery_collage', { left: 121, top: 52, width: 574, height: 414 }, 540)
 
-for (const [name, image] of [['writing', form], ['story', story], ['layout', layout], ['cover', cover], ['collage', collage]]) {
-  await sharp(image).resize(640, 480, { fit: 'contain', background: '#ffffff' })
-    .webp({ quality: 90 }).toFile(join(output, `example-${name}.webp`))
+const widgetOverview = widgetOverviewArgument || join(source, 'gallery_overview_3x4.png')
+const overviewSize = await sharp(widgetOverview).metadata()
+const widgetCrops = [
+  { name: 'keyword-grid', left: 8, top: 76, width: 220, height: 228 },
+  { name: 'block-composer', left: 246, top: 84, width: 189, height: 210 },
+  { name: 'sketch-canvas', left: 478, top: 77, width: 207, height: 216 },
+  { name: 'embedded-selectors', left: 13, top: 687, width: 220, height: 137 },
+  { name: 'object-controls', left: 479, top: 969, width: 217, height: 228 },
+]
+for (const widget of widgetCrops) {
+  await sharp(widgetOverview).extract({
+    left: Math.round(widget.left * overviewSize.width / 700),
+    top: Math.round(widget.top * overviewSize.height / 1200),
+    width: Math.round(widget.width * overviewSize.width / 700),
+    height: Math.round(widget.height * overviewSize.height / 1200),
+  }).resize(640, 480, { fit: 'contain', background: '#ffffff' })
+    .webp({ quality: 90 }).toFile(join(output, `example-${widget.name}.webp`))
 }
 
 await sharp({ create: { width: 1000, height: 650, channels: 3, background: '#ffffff' } })

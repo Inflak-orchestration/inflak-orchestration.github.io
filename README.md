@@ -35,12 +35,13 @@ No GitHub repository is created and nothing is published by running this project
 - Visual reference and original logo: [Inflak-gallery](https://github.com/Inflak-orchestration/Inflak-gallery).
 - Fonts: Newsreader and DM Sans, distributed locally through Fontsource. Icons: Lucide.
 - The example carousel uses Embla with looping, dragging/swiping, arrow controls, and position dots. Images share 4:3 frames with contained artwork; there is no autoplay, stretching, or content cropping. Selecting an image opens the figure viewer.
+- Carousel examples showcase five distinct widget types from the supplied gallery overview: keyword grid, block composer, sketch canvas, embedded selectors, and object controls. The two case-study videos remain separate from this widget showcase.
 - Figure and content source: the supplied `ACM_CHI_2027___Gao_et_al__Inflak.zip`, specifically the abstract, architecture, gallery sections, and `gallery_main.pdf`, `gallery_collage.pdf`, and `walkthrough_case.pdf` figures.
 - Optimized assets in `public/assets/` are self-contained. Full figures remain available through the zoomable viewer; case previews and the hero use focused selections of the same interfaces.
-- The asset script accepts PNG renderings of those three PDFs, named `gallery_main.png`, `gallery_collage.png`, and `walkthrough_case.png`, plus the gallery logo:
+- The asset script accepts PNG renderings named `gallery_main.png`, `gallery_collage.png`, `walkthrough_case.png`, and `gallery_overview_3x4.png`, plus the gallery logo. An optional third argument supplies a higher-resolution rendering of `figures/gallery_overview_3x4.pdf` for the widget crops:
 
 ```sh
-node scripts/prepare-assets.mjs /path/to/rendered-figures /path/to/inflak-logo.png
+node scripts/prepare-assets.mjs /path/to/rendered-figures /path/to/inflak-logo.png /path/to/high-resolution-gallery-overview.png
 ```
 
 Homepage content and interaction behavior live in `src/homepage.ts`; design tokens and responsive rules are in `src/homepage.css`. Gallery and GitHub destinations are defined at the top of the TypeScript file. No paper download, publication venue, author attribution, or installation command is invented from the draft manuscript.
