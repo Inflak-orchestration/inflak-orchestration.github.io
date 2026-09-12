@@ -4,7 +4,7 @@ import '@fontsource/dm-sans/600.css'
 import '@fontsource/dm-sans/700.css'
 import '@fontsource/newsreader/500.css'
 import '@fontsource/newsreader/500-italic.css'
-import { createIcons, ArrowUpRight, ArrowRight, ArrowLeft, ArrowDown, BookOpen, Menu, X, Maximize2, ZoomIn, ZoomOut, Play } from 'lucide'
+import { createIcons, ArrowUpRight, ArrowRight, ArrowLeft, ArrowDown, BookOpen, Menu, X, Maximize2, ZoomIn, ZoomOut, Play, Check, Minus, Folder, FileJson, Files } from 'lucide'
 import EmblaCarousel from 'embla-carousel'
 import './homepage.css'
 
@@ -17,7 +17,23 @@ const recordings = {
   collage: { title: 'SVG Collage Authoring', url: collageVideo, poster: 'collage-preview.webp', description: 'Create, edit, and refine a persistent SVG collage with Inflak.' },
 }
 const organization = 'https://github.com/Inflak-orchestration'
+const sourceRepository = `${organization}/inflak-main`
 const icon = (name: string) => `<i data-lucide="${name === 'github' ? 'book-open' : name}" aria-hidden="true"></i>`
+const mainPlanners = [
+  { id: 'writing-draft', name: 'Writing draft', purpose: 'Create new text' },
+  { id: 'writing-revision', name: 'Writing revision', purpose: 'Refine existing text' },
+  { id: 'prompt-enhancement', name: 'Prompt enhancement', purpose: 'Improve an instruction' },
+  { id: 'image-generation', name: 'Image generation', purpose: 'Create a new image' },
+  { id: 'image-edit', name: 'Image editing', purpose: 'Transform an existing image' },
+]
+const mainWidgets = [
+  { name: 'Settings form', planners: ['writing-draft', 'writing-revision', 'image-generation', 'image-edit'] },
+  { name: 'Option selector', planners: ['writing-draft', 'writing-revision', 'prompt-enhancement', 'image-generation', 'image-edit'] },
+  { name: 'Content editor', planners: ['prompt-enhancement'] },
+  { name: 'Structure editor', planners: ['prompt-enhancement'] },
+  { name: 'Canvas editor', planners: ['image-generation', 'image-edit'] },
+  { name: 'Parameter controls', planners: ['writing-revision', 'image-edit'] },
+]
 const examples = [
   { id: 'keyword-grid', title: 'Keyword grid', description: 'Selectable keyword suggestions refine an image prompt, with a side-by-side comparison before confirmation.' },
   { id: 'block-composer', title: 'Block composer', description: 'Draggable instruction blocks organize subject, action, and composition into a structured prompt.' },
@@ -40,7 +56,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <a class="nav-home" href="#" aria-current="page">Overview</a>
       <a href="#architecture">Architecture</a>
       <a href="${gallery}">Case gallery ${icon('arrow-up-right')}</a>
-      <a class="nav-github" href="${organization}">${icon('github')} GitHub</a>
+      <a class="nav-github" href="${sourceRepository}">${icon('github')} GitHub</a>
     </nav>
     <button class="icon-button menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="navigation" title="Open navigation">${icon('menu')}</button>
   </header>
@@ -86,9 +102,33 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       </div>
       <div class="architecture-foot"><p>${icon('arrow-right')} Every interaction and execution result returns to the Router. The next step follows the current state, not a fixed script.</p><button class="text-link" data-figure="walkthrough" type="button">View the full flow ${icon('maximize-2')}</button></div>
     </section>
+    <section class="implementation-band" id="inflak-main" aria-labelledby="implementation-title">
+      <div class="container section">
+        <div class="section-heading"><p class="eyebrow">02 / The implementation</p><span class="section-note">Agent-native. Skill-based. Composable.</span></div>
+        <div class="implementation-intro">
+          <div><h2 id="implementation-title">Inflak Main</h2><p class="implementation-subtitle">The architecture, packaged as skills.</p></div>
+          <div class="implementation-summary"><p>A co-creation plugin with five task planners and six reusable widget designs. One Router coordinates the task; one Renderer realizes the selected interaction.</p><a class="text-link" href="${sourceRepository}">View Inflak Main on GitHub ${icon('arrow-up-right')}</a></div>
+        </div>
+        <div class="implementation-map-heading"><h3>Different tasks, shared widgets.</h3><span>5 planners / 6 widget designs</span></div>
+        <div class="compatibility-scroll" tabindex="0" role="region" aria-label="Planner and widget compatibility">
+          <table class="compatibility-table">
+            <caption class="implementation-sr-only">Registered widget compatibility for the five Inflak Main task planners</caption>
+            <thead><tr><th scope="col">Task planner</th>${mainWidgets.map((widget) => `<th scope="col">${widget.name}</th>`).join('')}</tr></thead>
+            <tbody>${mainPlanners.map((planner) => `<tr><th scope="row"><span>${planner.name}</span><small>${planner.purpose}</small></th>${mainWidgets.map((widget) => `<td class="${widget.planners.includes(planner.id) ? 'widget-supported' : 'widget-unregistered'}">${icon(widget.planners.includes(planner.id) ? 'check' : 'minus')}<span class="implementation-sr-only">${widget.planners.includes(planner.id) ? 'Registered' : 'Not registered'}</span></td>`).join('')}</tr>`).join('')}</tbody>
+          </table>
+        </div>
+        <p class="compatibility-note">${icon('check')} Registered compatibility. At runtime, the planner selects a widget only when it matches the current gap, expected return, and available capabilities.</p>
+        <div class="implementation-package" aria-label="Plugin package structure">
+          <a href="${sourceRepository}/tree/main/skills"><span class="package-name">${icon('folder')}<code>skills/</code>${icon('arrow-up-right')}</span><strong>13 callable skills</strong><p>One Router, five Planners, six Designers, and one Renderer.</p></a>
+          <a href="${sourceRepository}/tree/main/registry"><span class="package-name">${icon('file-json')}<code>registry/</code>${icon('arrow-up-right')}</span><strong>Explicit registrations</strong><p>Planner, widget, and tool definitions connect the available capabilities.</p></a>
+          <a href="${sourceRepository}/tree/main/contract"><span class="package-name">${icon('files')}<code>contract/</code>${icon('arrow-up-right')}</span><strong>Shared contracts</strong><p>Cross-layer definitions support skill authoring and review.</p></a>
+        </div>
+        <p class="implementation-host"><strong>Inside a compatible agent host.</strong> The host provides the model, registered tools, sandboxed rendering, and widget-return bridge. Inflak Main supplies the orchestration skills, not a standalone agent application.</p>
+      </div>
+    </section>
     <section class="practice-band" id="in-practice" aria-labelledby="practice-title">
       <div class="container section">
-        <div class="section-heading"><p class="eyebrow">02 / In practice</p><a class="text-link" href="${gallery}">All 15 recorded cases ${icon('arrow-up-right')}</a></div>
+        <div class="section-heading"><p class="eyebrow">03 / In practice</p><a class="text-link" href="${gallery}">All 15 recorded cases ${icon('arrow-up-right')}</a></div>
         <h2 id="practice-title">Different tasks.<br><em>The same foundation.</em></h2>
         <div class="case-grid">
           <article class="case">
@@ -121,7 +161,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   </dialog>
 `
 
-const refreshIcons = () => createIcons({ icons: { ArrowUpRight, ArrowRight, ArrowLeft, ArrowDown, BookOpen, Menu, X, Maximize2, ZoomIn, ZoomOut, Play } })
+const refreshIcons = () => createIcons({ icons: { ArrowUpRight, ArrowRight, ArrowLeft, ArrowDown, BookOpen, Menu, X, Maximize2, ZoomIn, ZoomOut, Play, Check, Minus, Folder, FileJson, Files } })
 const viewport = document.querySelector<HTMLElement>('.examples-viewport')!
 const carousel = EmblaCarousel(viewport, { loop: true, align: 'start', slidesToScroll: 1 })
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
