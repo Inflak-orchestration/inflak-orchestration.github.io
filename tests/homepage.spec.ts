@@ -38,12 +38,13 @@ test('example carousel loops, supports keyboard and dots, and keeps uniform imag
   const carousel = page.getByRole('region', { name: 'Inflak examples' })
   const dots = carousel.locator('.carousel-dot')
   await expect(dots).toHaveCount(5)
+  await expect(carousel.locator('.example-title')).toHaveText(['Keyword grid', 'Block composer', 'Sketch canvas', 'Embedded selectors', 'Object controls'])
   await expect(dots.nth(0)).toHaveAttribute('aria-current', 'true')
   await carousel.getByRole('button', { name: 'Previous example' }).click()
   await expect(dots.nth(4)).toHaveAttribute('aria-current', 'true')
   await carousel.getByRole('button', { name: 'Next example' }).click()
   await expect(dots.nth(0)).toHaveAttribute('aria-current', 'true')
-  await carousel.getByRole('button', { name: 'Show generated book cover' }).click()
+  await carousel.getByRole('button', { name: 'Show embedded selectors' }).click()
   await expect(dots.nth(3)).toHaveAttribute('aria-current', 'true')
   await carousel.locator('.examples-viewport').focus()
   await page.keyboard.press('ArrowLeft')
@@ -62,14 +63,14 @@ test('example carousel loops, supports keyboard and dots, and keeps uniform imag
     expect(image.width).toBeCloseTo(dimensions[0]!.width, 1)
     expect(image.naturalWidth / image.naturalHeight).toBeCloseTo(4 / 3, 2)
   }
-  await carousel.getByRole('button', { name: 'Expand collage authoring', exact: true }).click()
+  await carousel.getByRole('button', { name: 'Expand object controls', exact: true }).click()
   await expect(page.getByRole('dialog')).toBeVisible()
-  await expect(page.locator('#figure-title')).toHaveText('Collage authoring')
+  await expect(page.locator('#figure-title')).toHaveText('Object controls')
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog')).not.toBeVisible()
   for (const [width, height] of [[1440, 740], [1920, 1080], [320, 568]]) {
     await page.setViewportSize({ width: width!, height: height! })
-    await carousel.getByRole('button', { name: 'Show writing settings' }).click()
+    await carousel.getByRole('button', { name: 'Show keyword grid' }).click()
     await carousel.getByRole('button', { name: 'Previous example' }).click()
     await expect(dots.nth(4)).toHaveAttribute('aria-current', 'true')
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
@@ -91,9 +92,46 @@ test('example carousel can be dragged without opening the figure', async ({ page
   await expect(page.getByRole('dialog')).not.toBeVisible()
 })
 
+test('case videos open in-page and stop on every dismissal path', async ({ page }) => {
+  await page.route('**/data/gallery_cases/clips/*.mp4', (route) => route.abort())
+  await page.goto('/')
+  const originalUrl = page.url()
+  const cases = page.locator('#in-practice .case')
+  const dialog = page.locator('.video-dialog')
+  const video = dialog.locator('video')
+  await expect(video).not.toHaveAttribute('src')
+  for (const [index, title, filename] of [
+    [0, 'InFlak Main', 'inflak-main.mp4'],
+    [1, 'SVG Collage Authoring', 'inflak-svg-collage-authoring.mp4'],
+  ] as const) {
+    const destination = `https://inflak-orchestration.github.io/Inflak-gallery/data/gallery_cases/clips/${filename}`
+    for (const [name, dismissal] of [[`Watch ${title} video`, 'escape'], [`Watch ${title}`, 'button'], [`Watch ${title}`, 'backdrop']] as const) {
+      const opener = cases.nth(index).getByRole('button', { name, exact: true })
+      await opener.click()
+      await expect(dialog).toBeVisible()
+      await expect(dialog.getByRole('heading', { name: title, exact: true })).toBeVisible()
+      await expect(video).toHaveAttribute('src', destination)
+      await expect(video).toHaveJSProperty('controls', true)
+      await expect(video).toHaveJSProperty('playsInline', true)
+      await expect(page).toHaveURL(originalUrl)
+      await expect(page.locator('body')).toHaveClass('dialog-open')
+      await expect(dialog.getByRole('link', { name: 'Open video' })).toHaveAttribute('href', destination)
+      await expect(dialog.getByRole('status')).toContainText('Video could not be loaded.')
+      if (dismissal === 'escape') await page.keyboard.press('Escape')
+      else if (dismissal === 'button') await dialog.getByRole('button', { name: 'Close video' }).click()
+      else await page.mouse.click(2, 2)
+      await expect(dialog).not.toBeVisible()
+      await expect(video).toHaveJSProperty('paused', true)
+      await expect(video).not.toHaveAttribute('src')
+      await expect(page.locator('body')).not.toHaveClass('dialog-open')
+      await expect(opener).toBeFocused()
+    }
+  }
+})
+
 test('figures open, zoom, close, and restore focus', async ({ page }) => {
   await page.goto('/')
-  for (const name of ['View the full flow', 'Explore multimodal co-creation', 'Explore collage authoring']) {
+  for (const name of ['View the full flow']) {
     const opener = page.getByRole('button', { name, exact: true })
     await opener.click()
     const dialog = page.getByRole('dialog')
@@ -125,10 +163,15 @@ test('mobile navigation and narrow layouts remain usable', async ({ page }) => {
 })
 
 test('page and figure dialog pass accessibility checks', async ({ page }) => {
+  await page.route('**/data/gallery_cases/clips/*.mp4', (route) => route.abort())
   await page.goto('/')
   await page.locator('.hero-content').evaluate((element) => Promise.all(element.getAnimations().map((animation) => animation.finished)))
   await page.locator('.site-footer').scrollIntoViewIfNeeded()
   expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([])
   await page.getByRole('button', { name: 'View the full flow' }).click()
+  expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([])
+  await page.keyboard.press('Escape')
+  await page.getByRole('button', { name: 'Watch InFlak Main', exact: true }).click()
+  await expect(page.locator('.video-status')).toContainText('Video could not be loaded.')
   expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([])
 })

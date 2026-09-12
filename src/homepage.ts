@@ -4,20 +4,26 @@ import '@fontsource/dm-sans/600.css'
 import '@fontsource/dm-sans/700.css'
 import '@fontsource/newsreader/500.css'
 import '@fontsource/newsreader/500-italic.css'
-import { createIcons, ArrowUpRight, ArrowRight, ArrowLeft, ArrowDown, BookOpen, Menu, X, Maximize2, ZoomIn, ZoomOut } from 'lucide'
+import { createIcons, ArrowUpRight, ArrowRight, ArrowLeft, ArrowDown, BookOpen, Menu, X, Maximize2, ZoomIn, ZoomOut, Play } from 'lucide'
 import EmblaCarousel from 'embla-carousel'
 import './homepage.css'
 
 const asset = (name: string) => `${import.meta.env.BASE_URL}assets/${name}`
 const gallery = 'https://inflak-orchestration.github.io/Inflak-gallery/'
+const mainVideo = new URL('data/gallery_cases/clips/inflak-main.mp4', gallery).href
+const collageVideo = new URL('data/gallery_cases/clips/inflak-svg-collage-authoring.mp4', gallery).href
+const recordings = {
+  main: { title: 'InFlak Main', url: mainVideo, poster: 'co-creation-preview.webp', description: 'A connected workflow from story writing to book-cover design.' },
+  collage: { title: 'SVG Collage Authoring', url: collageVideo, poster: 'collage-preview.webp', description: 'Create, edit, and refine a persistent SVG collage with Inflak.' },
+}
 const organization = 'https://github.com/Inflak-orchestration'
 const icon = (name: string) => `<i data-lucide="${name === 'github' ? 'book-open' : name}" aria-hidden="true"></i>`
 const examples = [
-  { id: 'writing', title: 'Writing settings', description: 'A structured form captures the audience, tone, and constraints for a story.' },
-  { id: 'story', title: 'Story refinement', description: 'An editable content list refines the story before generation.' },
-  { id: 'layout', title: 'Book-cover layout', description: 'A draggable layout board arranges the title, garden, and characters.' },
-  { id: 'cover', title: 'Generated book cover', description: 'The Friendship Garden cover, generated from the story and the arranged layout.' },
-  { id: 'collage', title: 'Collage authoring', description: 'A persistent collage evolves through visual theme selection, typography editing, and direct manipulation.' },
+  { id: 'keyword-grid', title: 'Keyword grid', description: 'Selectable keyword suggestions refine an image prompt, with a side-by-side comparison before confirmation.' },
+  { id: 'block-composer', title: 'Block composer', description: 'Draggable instruction blocks organize subject, action, and composition into a structured prompt.' },
+  { id: 'sketch-canvas', title: 'Sketch canvas', description: 'A drawing canvas captures spatial intent through colored sketches, a brush-width slider, and drawing tools.' },
+  { id: 'embedded-selectors', title: 'Embedded selectors', description: 'Inline dropdowns turn highlighted prompt phrases into precise, adjustable parameters.' },
+  { id: 'object-controls', title: 'Object controls', description: 'Color choices and a layout map support direct manipulation of individual elements in an SVG artifact.' },
 ]
 const layers = [
   { name: 'Router', question: 'What is happening now?', description: 'Reconstruct the current state from the user\'s intent, artifacts, and interaction history. Route control to the planner that can advance the task.', input: 'Intent + artifacts + history', output: 'Orchestration context', example: 'A request for a book cover reaches the image-generation planner, together with the story already written.' },
@@ -53,7 +59,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
           </div>
         </div>
         <div class="hero-caption">
-          <span>From intent to interaction to artifact</span>
+          <span>Different widgets. Shared orchestration.</span>
           <div class="carousel-controls">
             <button class="icon-button carousel-previous" aria-label="Previous example" title="Previous example" aria-controls="examples-viewport">${icon('arrow-left')}</button>
             <div class="carousel-dots" role="group" aria-label="Choose an example">${examples.map((example, index) => `<button class="carousel-dot" aria-label="Show ${example.title.toLowerCase()}" title="${example.title}" aria-current="${index === 0}" aria-controls="examples-viewport" data-slide="${index}"><span></span></button>`).join('')}</div>
@@ -86,16 +92,16 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         <h2 id="practice-title">Different tasks.<br><em>The same foundation.</em></h2>
         <div class="case-grid">
           <article class="case">
-            <button class="case-visual" data-figure="co-creation" aria-label="Expand multimodal co-creation figure"><img src="${asset('co-creation-preview.webp')}" alt="A draggable book-cover layout next to the generated Friendship Garden cover" width="1000" height="650" loading="lazy"><span class="expand-icon">${icon('maximize-2')}</span></button>
+            <button class="case-visual" type="button" data-video="main" aria-haspopup="dialog" aria-label="Watch InFlak Main video"><img src="${asset('co-creation-preview.webp')}" alt="A draggable book-cover layout next to the generated Friendship Garden cover" width="1000" height="650" loading="lazy"><span class="expand-icon">${icon('play')}</span></button>
             <div class="case-meta"><span class="eyebrow">Case study / 01</span><span class="case-tag blue">Text + image</span></div>
             <h3>From a story to its world.</h3><p>A writing brief becomes a story, then a book cover. Structured forms and a draggable layout board bring different kinds of human input into one connected creative process.</p>
-            <button class="text-link" data-figure="co-creation">Explore multimodal co-creation ${icon('arrow-right')}</button>
+            <button class="text-link" type="button" data-video="main" aria-haspopup="dialog">Watch InFlak Main ${icon('play')}</button>
           </article>
           <article class="case">
-            <button class="case-visual" data-figure="collage" aria-label="Expand collage authoring figure"><img src="${asset('collage-preview.webp')}" alt="Inflak's collage authoring interface with a visual composition and editable typography controls" width="1000" height="650" loading="lazy"><span class="expand-icon">${icon('maximize-2')}</span></button>
+            <button class="case-visual" type="button" data-video="collage" aria-haspopup="dialog" aria-label="Watch SVG Collage Authoring video"><img src="${asset('collage-preview.webp')}" alt="Inflak's collage authoring interface with a visual composition and editable typography controls" width="1000" height="650" loading="lazy"><span class="expand-icon">${icon('play')}</span></button>
             <div class="case-meta"><span class="eyebrow">Case study / 02</span><span class="case-tag green">Persistent artifacts</span></div>
             <h3>Make. Refine. Make it yours.</h3><p>A collage evolves through theme selection, direct manipulation, and guided revision. Composable interaction flows work on the same artifact as the task unfolds.</p>
-            <button class="text-link" data-figure="collage">Explore collage authoring ${icon('arrow-right')}</button>
+            <button class="text-link" type="button" data-video="collage" aria-haspopup="dialog">Watch SVG Collage Authoring ${icon('play')}</button>
           </article>
         </div>
       </div>
@@ -107,9 +113,15 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <div class="figure-scroll" tabindex="0" role="region" aria-label="Figure detail"><img id="figure-image" alt=""></div>
     <div class="dialog-footer"><p id="figure-description"></p><button class="icon-button zoom-toggle" aria-label="Zoom in" title="Zoom in" aria-pressed="false">${icon('zoom-in')}</button><a class="text-link" href="${gallery}">Visit gallery ${icon('arrow-up-right')}</a></div>
   </dialog>
+  <dialog class="video-dialog" aria-labelledby="video-title" aria-describedby="video-description">
+    <div class="dialog-header"><div><p class="eyebrow">Inflak / Case recording</p><h2 id="video-title"></h2></div><button class="icon-button video-close" type="button" aria-label="Close video" title="Close video">${icon('x')}</button></div>
+    <div class="video-stage"><video id="case-video" controls playsinline preload="none" aria-labelledby="video-title"></video></div>
+    <p class="video-status" role="status" hidden></p>
+    <div class="dialog-footer"><p id="video-description"></p><a class="text-link video-direct" target="_blank" rel="noopener noreferrer">Open video ${icon('arrow-up-right')}</a></div>
+  </dialog>
 `
 
-const refreshIcons = () => createIcons({ icons: { ArrowUpRight, ArrowRight, ArrowLeft, ArrowDown, BookOpen, Menu, X, Maximize2, ZoomIn, ZoomOut } })
+const refreshIcons = () => createIcons({ icons: { ArrowUpRight, ArrowRight, ArrowLeft, ArrowDown, BookOpen, Menu, X, Maximize2, ZoomIn, ZoomOut, Play } })
 const viewport = document.querySelector<HTMLElement>('.examples-viewport')!
 const carousel = EmblaCarousel(viewport, { loop: true, align: 'start', slidesToScroll: 1 })
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
@@ -233,3 +245,49 @@ dialog.addEventListener('close', () => {
   opener?.focus()
 })
 zoom.addEventListener('click', () => setZoom(zoom.getAttribute('aria-pressed') !== 'true'))
+
+const videoDialog = document.querySelector<HTMLDialogElement>('.video-dialog')!
+const video = document.querySelector<HTMLVideoElement>('#case-video')!
+const videoStatus = document.querySelector<HTMLParagraphElement>('.video-status')!
+let videoOpener: HTMLButtonElement | null = null
+
+function setVideoStatus(message: string) {
+  videoStatus.textContent = message
+  videoStatus.hidden = !message
+}
+
+document.querySelectorAll<HTMLButtonElement>('[data-video]').forEach((button) => button.addEventListener('click', () => {
+  const recording = recordings[button.dataset.video as keyof typeof recordings]
+  videoOpener = button
+  document.querySelector('#video-title')!.textContent = recording.title
+  document.querySelector('#video-description')!.textContent = recording.description
+  document.querySelector<HTMLAnchorElement>('.video-direct')!.href = recording.url
+  video.poster = asset(recording.poster)
+  video.src = recording.url
+  videoDialog.showModal()
+  document.body.classList.add('dialog-open')
+  setVideoStatus('Loading video...')
+  void video.play().catch(() => {})
+}))
+video.addEventListener('canplay', () => { if (videoDialog.open) setVideoStatus('') })
+video.addEventListener('playing', () => { if (videoDialog.open) setVideoStatus('') })
+video.addEventListener('waiting', () => { if (videoDialog.open) setVideoStatus('Loading video...') })
+video.addEventListener('error', () => {
+  if (videoDialog.open && video.hasAttribute('src')) setVideoStatus('Video could not be loaded. The original recording is available via Open video.')
+})
+document.querySelector('.video-close')!.addEventListener('click', () => videoDialog.close())
+videoDialog.addEventListener('click', (event) => {
+  if (event.target === videoDialog) {
+    const bounds = videoDialog.getBoundingClientRect()
+    if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) videoDialog.close()
+  }
+})
+videoDialog.addEventListener('close', () => {
+  video.pause()
+  video.removeAttribute('src')
+  video.removeAttribute('poster')
+  video.load()
+  setVideoStatus('')
+  document.body.classList.remove('dialog-open')
+  videoOpener?.focus()
+})
