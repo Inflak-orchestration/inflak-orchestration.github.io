@@ -13,6 +13,7 @@ const gallery = 'https://inflak-orchestration.github.io/Inflak-gallery/'
 const mainVideo = new URL('data/gallery_cases/clips/inflak-main.mp4', gallery).href
 const collageVideo = new URL('data/gallery_cases/clips/inflak-svg-collage-authoring.mp4', gallery).href
 const recordings = {
+  overview: { title: 'Inflak overview', url: asset('inflak-overview.mp4'), poster: '', description: 'An overview of Inflak and human-agent interaction orchestration.' },
   main: { title: 'InFlak Main', url: mainVideo, poster: 'co-creation-preview.webp', description: 'A connected workflow from story writing to book-cover design.' },
   collage: { title: 'SVG Collage Authoring', url: collageVideo, poster: 'collage-preview.webp', description: 'Create, edit, and refine a persistent SVG collage with Inflak.' },
 }
@@ -56,7 +57,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <a class="nav-home" href="#" aria-current="page">Overview</a>
       <a href="#architecture">Architecture</a>
       <a href="${gallery}">Case gallery ${icon('arrow-up-right')}</a>
-      <a class="nav-github" href="${sourceRepository}">${icon('github')} GitHub</a>
+      <a class="nav-github" href="${organization}">${icon('github')} GitHub</a>
     </nav>
     <button class="icon-button menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="navigation" title="Open navigation">${icon('menu')}</button>
   </header>
@@ -66,7 +67,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         <h1 id="hero-title">Inflak<span class="title-period">.</span></h1>
         <p class="hero-subtitle">Human-agent interaction,<br><em>orchestrated.</em></p>
         <p class="hero-description">The right interaction, at the right moment.<br>A unified architecture for agents that work with people.</p>
-        <div class="hero-actions"><a class="button button-primary" href="${gallery}">Explore the gallery ${icon('arrow-up-right')}</a><a class="text-link" href="#architecture">Meet the architecture ${icon('arrow-down')}</a></div>
+        <div class="hero-actions"><a class="button button-primary" href="${gallery}">Explore the gallery ${icon('arrow-up-right')}</a><button class="button button-secondary" type="button" data-video="overview" aria-haspopup="dialog">${icon('play')} Watch overview</button><a class="text-link" href="#architecture">Meet the architecture ${icon('arrow-down')}</a></div>
       </div>
       <div class="examples-carousel" role="region" aria-roledescription="carousel" aria-label="Inflak examples">
         <div class="examples-viewport" id="examples-viewport" tabindex="0" role="group" aria-label="Example slides">
@@ -154,7 +155,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <div class="dialog-footer"><p id="figure-description"></p><button class="icon-button zoom-toggle" aria-label="Zoom in" title="Zoom in" aria-pressed="false">${icon('zoom-in')}</button><a class="text-link" href="${gallery}">Visit gallery ${icon('arrow-up-right')}</a></div>
   </dialog>
   <dialog class="video-dialog" aria-labelledby="video-title" aria-describedby="video-description">
-    <div class="dialog-header"><div><p class="eyebrow">Inflak / Case recording</p><h2 id="video-title"></h2></div><button class="icon-button video-close" type="button" aria-label="Close video" title="Close video">${icon('x')}</button></div>
+    <div class="dialog-header"><div><p class="eyebrow">Inflak / Recording</p><h2 id="video-title"></h2></div><button class="icon-button video-close" type="button" aria-label="Close video" title="Close video">${icon('x')}</button></div>
     <div class="video-stage"><video id="case-video" controls playsinline preload="none" aria-labelledby="video-title"></video></div>
     <p class="video-status" role="status" hidden></p>
     <div class="dialog-footer"><p id="video-description"></p><a class="text-link video-direct" target="_blank" rel="noopener noreferrer">Open video ${icon('arrow-up-right')}</a></div>
@@ -302,7 +303,8 @@ document.querySelectorAll<HTMLButtonElement>('[data-video]').forEach((button) =>
   document.querySelector('#video-title')!.textContent = recording.title
   document.querySelector('#video-description')!.textContent = recording.description
   document.querySelector<HTMLAnchorElement>('.video-direct')!.href = recording.url
-  video.poster = asset(recording.poster)
+  if (recording.poster) video.poster = asset(recording.poster)
+  else video.removeAttribute('poster')
   video.src = recording.url
   videoDialog.showModal()
   document.body.classList.add('dialog-open')

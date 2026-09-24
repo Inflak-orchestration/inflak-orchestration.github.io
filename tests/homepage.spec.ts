@@ -17,7 +17,7 @@ test('loads real imagery with no runtime errors or horizontal overflow', async (
   await expect(page.getByRole('link', { name: 'Explore the gallery' })).toHaveAttribute('href', 'https://inflak-orchestration.github.io/Inflak-gallery/')
   const menu = page.getByRole('button', { name: 'Open navigation', exact: true })
   if (await menu.isVisible()) await menu.click()
-  await expect(page.getByRole('navigation').getByRole('link', { name: 'GitHub', exact: true })).toHaveAttribute('href', 'https://github.com/Inflak-orchestration/inflak-main')
+  await expect(page.getByRole('navigation').getByRole('link', { name: 'GitHub', exact: true })).toHaveAttribute('href', 'https://github.com/Inflak-orchestration')
 })
 
 test('architecture tabs support selection and keyboard navigation', async ({ page }) => {
@@ -121,6 +121,41 @@ test('example carousel can be dragged without opening the figure', async ({ page
   await page.mouse.up()
   await expect(page.locator('.carousel-dot').nth(0)).toHaveAttribute('aria-current', 'false')
   await expect(page.getByRole('dialog')).not.toBeVisible()
+})
+
+test('overview video loads on demand, plays locally, and stops on close', async ({ page }) => {
+  let videoRequested = false
+  page.on('request', (request) => {
+    if (new URL(request.url()).pathname.endsWith('/inflak-overview.mp4')) videoRequested = true
+  })
+  await page.goto('/')
+  const originalUrl = page.url()
+  const opener = page.getByRole('button', { name: 'Watch overview', exact: true })
+  await expect(opener).toBeVisible()
+  expect(videoRequested).toBe(false)
+  const video = page.locator('#case-video')
+  await expect(video).not.toHaveAttribute('src')
+  await opener.click()
+  const dialog = page.getByRole('dialog', { name: 'Inflak overview', exact: true })
+  await expect(dialog).toBeVisible()
+  await expect(video).toHaveAttribute('src', /assets\/inflak-overview\.mp4$/)
+  await expect(video).not.toHaveAttribute('poster')
+  await expect(video).toHaveJSProperty('controls', true)
+  await expect(video).toHaveJSProperty('playsInline', true)
+  await expect.poll(() => video.evaluate((element: HTMLVideoElement) => element.readyState)).toBeGreaterThanOrEqual(2)
+  await video.evaluate((element: HTMLVideoElement) => element.play())
+  await expect.poll(() => video.evaluate((element: HTMLVideoElement) => element.currentTime)).toBeGreaterThan(0.1)
+  const metadata = await video.evaluate((element: HTMLVideoElement) => ({ duration: element.duration, width: element.videoWidth, height: element.videoHeight }))
+  expect(metadata.duration).toBeCloseTo(217.57, 0)
+  expect(metadata.width).toBe(1662)
+  expect(metadata.height).toBe(1080)
+  await expect(dialog.getByRole('link', { name: 'Open video', exact: true })).toHaveAttribute('href', /assets\/inflak-overview\.mp4$/)
+  await expect(page).toHaveURL(originalUrl)
+  await dialog.getByRole('button', { name: 'Close video' }).click()
+  await expect(dialog).not.toBeVisible()
+  await expect(video).toHaveJSProperty('paused', true)
+  await expect(video).not.toHaveAttribute('src')
+  await expect(opener).toBeFocused()
 })
 
 test('case videos open in-page and stop on every dismissal path', async ({ page }) => {
