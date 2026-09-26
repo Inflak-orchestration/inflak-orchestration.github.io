@@ -17,6 +17,9 @@ test('loads real imagery with no runtime errors or horizontal overflow', async (
   await expect(page.getByRole('link', { name: 'Explore the gallery' })).toHaveAttribute('href', 'https://inflak-orchestration.github.io/Inflak-gallery/')
   const menu = page.getByRole('button', { name: 'Open navigation', exact: true })
   if (await menu.isVisible()) await menu.click()
+  const demo = page.getByRole('navigation').getByRole('link', { name: 'Inflak-demo', exact: true })
+  await expect(demo).toBeVisible()
+  await expect(demo).toHaveAttribute('href', 'https://github.com/Inflak-orchestration/Inflak-demo')
   await expect(page.getByRole('navigation').getByRole('link', { name: 'GitHub', exact: true })).toHaveAttribute('href', 'https://github.com/Inflak-orchestration')
 })
 
