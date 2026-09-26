@@ -57,6 +57,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <a class="nav-home" href="#" aria-current="page">Overview</a>
       <a href="#architecture">Architecture</a>
       <a href="${gallery}">Case gallery ${icon('arrow-up-right')}</a>
+      <a href="${organization}/Inflak-demo">Inflak-demo ${icon('arrow-up-right')}</a>
       <a class="nav-github" href="${organization}">${icon('github')} GitHub</a>
     </nav>
     <button class="icon-button menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="navigation" title="Open navigation">${icon('menu')}</button>
