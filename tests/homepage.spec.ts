@@ -17,10 +17,38 @@ test('loads real imagery with no runtime errors or horizontal overflow', async (
   await expect(page.getByRole('link', { name: 'Explore the gallery' })).toHaveAttribute('href', 'https://inflak-orchestration.github.io/Inflak-gallery/')
   const menu = page.getByRole('button', { name: 'Open navigation', exact: true })
   if (await menu.isVisible()) await menu.click()
-  const demo = page.getByRole('navigation').getByRole('link', { name: 'Inflak-demo', exact: true })
+  const demo = page.getByRole('navigation').getByRole('link', { name: 'Demo & Plugins', exact: true })
   await expect(demo).toBeVisible()
-  await expect(demo).toHaveAttribute('href', 'https://github.com/Inflak-orchestration/Inflak-demo')
+  await expect(demo).toHaveAttribute('href', '#demo')
   await expect(page.getByRole('navigation').getByRole('link', { name: 'GitHub', exact: true })).toHaveAttribute('href', 'https://github.com/Inflak-orchestration')
+})
+
+test('hero gives gallery and demo equal prominence with a secondary overview', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  const hero = page.locator('.hero-content')
+  const gallery = hero.getByRole('link', { name: 'Explore the gallery' })
+  const demo = hero.getByRole('link', { name: 'Explore the demo' })
+  const overview = hero.getByRole('button', { name: 'Watch overview' })
+  await expect(gallery).toHaveAttribute('href', 'https://inflak-orchestration.github.io/Inflak-gallery/')
+  await expect(demo).toHaveAttribute('href', '#demo')
+  await expect(hero.locator('.hero-actions .button-primary')).toHaveCount(2)
+  await expect(hero.getByRole('link', { name: 'Meet the architecture' })).toHaveCount(0)
+  await expect(hero.locator('.hero-description')).toHaveText('A unified architecture for agents that work with people.')
+  for (const [width, height] of [[1440, 900], [390, 844], [320, 568]]) {
+    await page.setViewportSize({ width: width!, height: height! })
+    const galleryBounds = (await gallery.boundingBox())!
+    const demoBounds = (await demo.boundingBox())!
+    const overviewBounds = (await overview.boundingBox())!
+    expect(galleryBounds.width).toBe(demoBounds.width)
+    expect(galleryBounds.height).toBe(demoBounds.height)
+    expect(overviewBounds.y).toBeGreaterThanOrEqual(demoBounds.y + demoBounds.height)
+    expect(demoBounds.y + demoBounds.height).toBeLessThan(height!)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  }
+  await demo.click()
+  await expect(page).toHaveURL(/#demo$/)
+  await expect(page.locator('#demo-title')).toBeInViewport()
 })
 
 test('architecture tabs support selection and keyboard navigation', async ({ page }) => {
@@ -29,20 +57,20 @@ test('architecture tabs support selection and keyboard navigation', async ({ pag
   await router.focus()
   await page.keyboard.press('ArrowDown')
   await expect(page.getByRole('tab', { name: 'L2 Planner' })).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByRole('tabpanel')).toContainText('What should happen next?')
+  await expect(page.locator('#layer-panel')).toContainText('What should happen next?')
   await page.keyboard.press('End')
-  await expect(page.getByRole('tabpanel')).toContainText('How does it become an interface?')
+  await expect(page.locator('#layer-panel')).toContainText('How does it become an interface?')
   await page.keyboard.press('Home')
   await expect(router).toBeFocused()
   await page.getByRole('tab', { name: 'L3 Designer' }).click()
-  await expect(page.getByRole('tabpanel')).toContainText('Semantic widget contract')
+  await expect(page.locator('#layer-panel')).toContainText('Semantic widget contract')
 })
 
-test('Inflak Main overview shows the registered planners, widgets, and source package', async ({ page }) => {
+test('Multimodal Co-Creation overview shows the registered planners, widgets, and source package', async ({ page }) => {
   await page.goto('/#inflak-main')
-  const section = page.getByRole('region', { name: 'Inflak Main', exact: true })
-  await expect(section.getByRole('heading', { name: 'Inflak Main', exact: true })).toBeVisible()
-  await expect(page.locator('#architecture + #inflak-main + #in-practice')).toHaveCount(1)
+  const section = page.getByRole('region', { name: 'Multimodal Co-Creation', exact: true })
+  await expect(section.getByRole('heading', { name: 'Multimodal Co-Creation', exact: true })).toBeVisible()
+  await expect(page.locator('#architecture + #inflak-main + #in-practice + #demo')).toHaveCount(1)
   await expect(section.locator('thead th')).toHaveText(['Task planner', 'Settings form', 'Option selector', 'Content editor', 'Structure editor', 'Canvas editor', 'Parameter controls'])
   const rows = section.locator('tbody tr')
   await expect(rows).toHaveCount(5)
@@ -53,7 +81,7 @@ test('Inflak Main overview shows the registered planners, widgets, and source pa
     await expect(rows.nth(index).getByRole('rowheader')).toContainText(name)
     await expect(rows.nth(index).locator('.widget-supported')).toHaveCount(supported)
   }
-  await expect(section.getByRole('link', { name: 'View Inflak Main on GitHub' })).toHaveAttribute('href', 'https://github.com/Inflak-orchestration/inflak-main')
+  await expect(section.getByRole('link', { name: 'View Multimodal Co-Creation on GitHub' })).toHaveAttribute('href', 'https://github.com/Inflak-orchestration/inflak-main')
   for (const directory of ['skills', 'registry', 'contract']) {
     await expect(section.locator(`a[href$="/tree/main/${directory}"]`)).toHaveCount(1)
   }
@@ -64,6 +92,65 @@ test('Inflak Main overview shows the registered planners, widgets, and source pa
   await page.keyboard.press('ArrowRight')
   await expect.poll(() => map.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0)
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+})
+
+test('demo plugins explain layer skills consistently and group generated plugins under Author', async ({ page }) => {
+  await page.goto('/#demo')
+  const demo = page.locator('#demo')
+  const tabs = demo.getByRole('tab')
+  await expect(tabs).toHaveCount(4)
+  await expect(demo.locator('img')).toHaveCount(0)
+  await expect(demo.getByRole('link', { name: 'Explore layer skills' })).toHaveCount(0)
+  await expect(demo.getByRole('link', { name: 'View gallery case' })).toHaveAttribute('href', /\?case=inflak-main$/)
+  await expect(demo.getByRole('tab', { name: /Daily Paper/ })).toHaveCount(0)
+  await expect(demo.getByRole('link', { name: 'Run locally' })).toHaveAttribute('href', /Inflak-demo#install-on-another-machine$/)
+  await expect(demo.getByRole('tabpanel')).toHaveCount(1)
+  await tabs.nth(0).focus()
+  await page.keyboard.press('ArrowDown')
+  await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true')
+  await expect(demo.getByRole('tabpanel').locator('.plugin-layers > div')).toHaveCount(4)
+  await expect(demo.getByRole('tabpanel')).toContainText('atomic commits')
+  await expect(demo.getByRole('link', { name: 'View gallery case' })).toHaveAttribute('href', /\?case=inflak-svg-authoring$/)
+  await tabs.nth(2).click()
+  await expect(demo.locator('option')).toHaveCount(13)
+  const layerTexts: string[][] = [[], [], [], []]
+  const caseIds = ['inflak-pN1-image-prompt-iteration', 'inflak-pN2-input-grounded-prompt-structure', 'inflak-pN3-sketch-layout', 'inflak-pN4-image-inpainting', 'inflak-pN5-writing-brainstorm', 'inflak-pN6', 'inflak-pN7-image-prompt-control', 'inflak-pN8', 'inflak-pN9-chart-analysis-instruction', 'inflak-pN10-svg-refinement-instruction', 'inflak-pN11-svg-prompt-enhancement', 'inflak-pN12-interactive-svg-refinement', 'inflak-pN13-proactive-intent-recommendation']
+  const specificTerms = ['selected keywords', 'source spans', 'color-to-object', 'marked scope', 'narrative directions', 'source-prompt IDs', 'control specification', 'authoring bundle', 'source evidence', 'artifact-first', 'ambiguous references', 'candidate identity', 'inferred goals']
+  for (let index = 0; index < 13; index++) {
+    await demo.getByLabel('Interaction paradigm', { exact: true }).selectOption(String(index))
+    await expect(demo.locator('#paradigm-source')).toHaveAttribute('href', new RegExp(`/inflak-pN${index + 1}-`))
+    await expect(demo.locator('#paradigm-description')).not.toBeEmpty()
+    await expect(demo.locator('#paradigm-case')).toHaveAttribute('href', new RegExp(`\\?case=${caseIds[index]}$`))
+    const descriptions = demo.locator('#plugin-panel-paradigms > .plugin-layers dd')
+    await expect(descriptions.first()).toContainText(specificTerms[index]!)
+    for (let layerIndex = 0; layerIndex < 4; layerIndex++) {
+      layerTexts[layerIndex]!.push(await descriptions.nth(layerIndex).innerText())
+    }
+  }
+  for (const descriptions of layerTexts) expect(new Set(descriptions).size).toBe(13)
+  await demo.getByLabel('Interaction paradigm', { exact: true }).selectOption('6')
+  await expect(demo.locator('#plugin-panel-paradigms')).toContainText('frame-share sliders')
+  await expect(demo.locator('#plugin-panel-paradigms > .contract')).toContainText('confirmed control specification')
+  await expect(demo.locator('#plugin-panel-paradigms')).not.toContainText('In P3')
+  for (const width of [320, 390, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 })
+    for (let index = 0; index < 4; index++) {
+      await tabs.nth(index).click()
+      await expect(demo.getByRole('tabpanel')).toHaveCount(1)
+      await expect(demo.getByRole('tabpanel').locator(':scope > .plugin-layers dt')).toHaveText(['L1Router', 'L2Planner', 'L3Designer', 'L4Renderer'])
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    }
+  }
+  const generated = demo.getByRole('region', { name: 'Daily Paper Conclusion' })
+  await expect(demo.getByRole('link', { name: 'View gallery case' })).toHaveCount(0)
+  await expect(generated).toBeVisible()
+  await expect(generated.locator('.plugin-layers > div')).toHaveCount(4)
+  await expect(generated.getByRole('link', { name: 'View generated plugin' })).toHaveAttribute('href', /plugins\/inflak-daily-paper-conclusion$/)
+  await tabs.nth(3).focus()
+  await page.keyboard.press('Home')
+  await expect(tabs.nth(0)).toBeFocused()
+  await page.keyboard.press('End')
+  await expect(tabs.nth(3)).toBeFocused()
 })
 
 test('example carousel loops, supports keyboard and dots, and keeps uniform image ratios', async ({ page }) => {
@@ -170,7 +257,7 @@ test('case videos open in-page and stop on every dismissal path', async ({ page 
   const video = dialog.locator('video')
   await expect(video).not.toHaveAttribute('src')
   for (const [index, title, filename] of [
-    [0, 'InFlak Main', 'inflak-main.mp4'],
+    [0, 'Multimodal Co-Creation', 'inflak-main.mp4'],
     [1, 'SVG Collage Authoring', 'inflak-svg-collage-authoring.mp4'],
   ] as const) {
     const destination = `https://inflak-orchestration.github.io/Inflak-gallery/data/gallery_cases/clips/${filename}`
@@ -240,7 +327,7 @@ test('page and figure dialog pass accessibility checks', async ({ page }) => {
   await page.getByRole('button', { name: 'View the full flow' }).click()
   expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([])
   await page.keyboard.press('Escape')
-  await page.getByRole('button', { name: 'Watch InFlak Main', exact: true }).click()
+  await page.getByRole('button', { name: 'Watch Multimodal Co-Creation', exact: true }).click()
   await expect(page.locator('.video-status')).toContainText('Video could not be loaded.')
   expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations).toEqual([])
 })

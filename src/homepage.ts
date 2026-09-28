@@ -14,11 +14,209 @@ const mainVideo = new URL('data/gallery_cases/clips/inflak-main.mp4', gallery).h
 const collageVideo = new URL('data/gallery_cases/clips/inflak-svg-collage-authoring.mp4', gallery).href
 const recordings = {
   overview: { title: 'Inflak overview', url: asset('inflak-overview.mp4'), poster: '', description: 'An overview of Inflak and human-agent interaction orchestration.' },
-  main: { title: 'InFlak Main', url: mainVideo, poster: 'co-creation-preview.webp', description: 'A connected workflow from story writing to book-cover design.' },
+  main: { title: 'Multimodal Co-Creation', url: mainVideo, poster: 'co-creation-preview.webp', description: 'A connected workflow from story writing to book-cover design.' },
   collage: { title: 'SVG Collage Authoring', url: collageVideo, poster: 'collage-preview.webp', description: 'Create, edit, and refine a persistent SVG collage with Inflak.' },
 }
 const organization = 'https://github.com/Inflak-orchestration'
 const sourceRepository = `${organization}/inflak-main`
+const demoRepository = `${organization}/Inflak-demo`
+const galleryCase = (caseId: string) => {
+  const url = new URL(import.meta.env.VITE_GALLERY_URL || gallery)
+  url.searchParams.set('case', caseId)
+  return url.href
+}
+const paradigms = [
+  { slug: 'user-driven-prompt-refinement', name: 'User-driven prompt refinement', description: 'Select parts of an image prompt to extend, steer, or restyle before generating the image.' },
+  { slug: 'user-driven-prompt-organization', name: 'User-driven prompt organization', description: 'Organize traceable units from your own visual instruction into a confirmed prompt structure.' },
+  { slug: 'interaction-as-part-of-instruction', name: 'Interaction as part of instruction', description: 'Draw a color-to-object layout sketch and confirm the spatial brief before image generation.' },
+  { slug: 'referenced-artifact-as-instruction', name: 'Referenced artifact as instruction', description: 'Mark a region of an existing image, add an editing instruction, and review the generated edit.' },
+  { slug: 'ai-driven-prompt-suggestion', name: 'AI-driven prompt suggestion', description: 'Explore narrative directions proposed from a seed idea, then confirm a prompt for writing.' },
+  { slug: 'ai-driven-prompt-decomposition', name: 'AI-driven prompt decomposition', description: 'Organize and edit fine-grained prompt components on a canvas before generating a story.' },
+  { slug: 'generative-prompt-control-widgets', name: 'Generative prompt control widgets', description: 'Adjust image-prompt priorities, composition, and preferences through embedded controls.' },
+  { slug: 'generative-artifact-control-widgets', name: 'Generative artifact control widgets', description: 'Create and adjust a layered SVG collage with prepared assets and deterministic object controls.' },
+  { slug: 'artifact-to-structured-instruction', name: 'Artifact to structured instruction', description: 'Ground an analysis request in a chart or table and generate an evidence-backed report.' },
+  { slug: 'artifact-to-multimodal-instruction', name: 'Artifact to multimodal instruction', description: 'Analyze an SVG without an initial prompt, confirm object-grounded instructions, and apply the authorized changes.' },
+  { slug: 'artifact-driven-prompt-enhancement', name: 'Artifact-driven prompt enhancement', description: 'Ground an existing prompt in SVG objects, approve concrete actions, and execute the confirmed enhancement.' },
+  { slug: 'interactive-artifact-refinement', name: 'Interactive artifact refinement', description: 'Refine a layered SVG collage and commit confirmed changes as new artifact revisions.' },
+  { slug: 'ai-proactively-initiated-interaction', name: 'AI-proactively-initiated interaction', description: 'Choose among context-grounded next actions, resolve implementation needs, and carry out the confirmed direction.' },
+]
+const paradigmDetails = [
+  {
+    caseId: 'inflak-pN1-image-prompt-iteration',
+    input: 'An image idea or draft prompt', output: 'An image from the accepted prompt',
+    layers: [
+      'Keeps the evolving image prompt, selected keywords, and current acceptance. Any prompt edit invalidates earlier approval before generation.',
+      'Identifies whether object extension, object steering, style, or prompt confirmation is unresolved. Prepares wording with the text model and invokes image generation only for the accepted prompt.',
+      'Specifies a keyword grid with separate extension, steering, and style groups, or a prompt review with accept, refine, and manual-edit returns.',
+      'Renders the keyword choices and editable prompt review in a sandbox. Sends the chosen words or exact reviewed prompt back to L1, without generating the image.',
+    ],
+  },
+  {
+    input: 'The user\'s visual instruction', output: 'An image or multi-panel storyboard',
+    caseId: 'inflak-pN2-input-grounded-prompt-structure',
+    layers: [
+      'Preserves the original wording, exact source spans, user-owned groups, order, and locks. Tracks structure confirmation separately from instruction-preview approval.',
+      'Starts with source organization rather than model rewriting. Requires a deterministic preview of the confirmed structure before image generation; no GenAI preparation precedes those confirmations.',
+      'Defines the source-and-structure editor, starting extracted units in Unsorted. Specifies user-authored grouping, ordering, activation, and locking, plus a separate read-only instruction preview.',
+      'Implements the editor and preview, preserving source text while the user manipulates traceable units. Returns the confirmed structure or preview decision to L1.',
+    ],
+  },
+  {
+    input: 'An image prompt and object-layout sketch', output: 'A sketch-grounded image',
+    caseId: 'inflak-pN3-sketch-layout',
+    layers: [
+      'Tracks the prompt, color-to-object legend, actual sketch files, compiled spatial brief, and generated candidate. Keeps each confirmation bound to the current layout.',
+      'Resolves missing object bindings or spatial intent before brief confirmation. Calls edit_image with the real sketch and full-canvas transparent mask only when the generation brief is ready.',
+      'Defines the drawing interaction, color-to-object bindings, normalized strokes, spatial-brief confirmation, and subsequent candidate review.',
+      'Realizes the sketch pad and review widgets. Exports the drawn sketch and same-sized transparent mask, then returns their references and user decisions to L1.',
+    ],
+  },
+  {
+    input: 'A source image, marked region, and edit request', output: 'An accepted locally edited image',
+    caseId: 'inflak-pN4-image-inpainting',
+    layers: [
+      'Binds the original image to its marked scope, edit request, and new candidate. Tracks whether the user keeps the original, accepts the edit, or requests another revision.',
+      'Requires an actual source image, explicit edit area, and replacement instruction. Calls edit_image with either normalized boxes or a source-sized brush mask, then routes the result back for review.',
+      'Specifies one active scope mode, box or brush, and a source-versus-candidate comparison with accept, retain-original, or revise outcomes.',
+      'Renders region marking and comparison. Brush mode uploads a mask with transparent edit pixels and opaque preserve pixels; the widget never executes the inpaint operation.',
+    ],
+  },
+  {
+    input: 'A seed idea for writing', output: 'Text from a writer-confirmed direction',
+    caseId: 'inflak-pN5-writing-brainstorm',
+    layers: [
+      'Keeps the seed, proposed narrative directions, writer selections, focused prompt, and actual writing result. Suggestions remain optional until the writer adopts them.',
+      'Uses bounded preparation to propose four to six distinct narrative strategies. Resolves the writer\'s choice and focused prompt before a separate final-writing pass.',
+      'Defines direction selection around logline, narrative lens, form, tone, hook, and tradeoff, followed by the interaction needed to focus and confirm the chosen prompt.',
+      'Presents the narrative alternatives and prompt review, capturing selected material and edits. Returns the writer\'s decisions without treating a proposal as authorization to write.',
+    ],
+  },
+  {
+    input: 'One or more source prompts', output: 'A story from an approved Story Brief',
+    caseId: 'inflak-pN6',
+    layers: [
+      'Maintains source-prompt IDs, extracted components, user organization, and Story Brief approval. Preserves which source supports each character, event, relationship, or constraint.',
+      'Separates model-driven decomposition from final story generation. Chooses a hierarchy or topical organization according to the material, then requires approval of the compiled Story Brief.',
+      'Defines a prompt structure tree for containment and order, or a cell map for non-hierarchical topics. Specifies a separate traceable Story Brief review.',
+      'Implements component editing and reorganization while retaining source references and user-added provenance. Returns the structure or brief decision; it does not write the final story.',
+    ],
+  },
+  {
+    input: 'An image prompt and semantic control choices', output: 'An image from a confirmed control specification',
+    caseId: 'inflak-pN7-image-prompt-control',
+    layers: [
+      'Preserves the original prompt and accepted control specification: anchored entities, priority, composition, preferences, exclusions, and weights. Routes reported image mismatches back into control refinement.',
+      'Analyzes controllable prompt units before selecting the next material adjustment. Keeps content decisions ahead of dependent roles or weights, and generates only after current compiled-prompt acceptance.',
+      'Defines source-anchored inline controls, including independent frame-share sliders, separate preferred and avoided candidates, and attention settings that respect provider capabilities.',
+      'Implements those inline controls and returns exact values without rebalancing frame shares or turning exclusions into positive prompts. Image generation remains a later execution step.',
+    ],
+  },
+  {
+    input: 'A collage brief or layered SVG', output: 'An edited, layered SVG collage',
+    caseId: 'inflak-pN8',
+    layers: [
+      'Tracks the canonical collage revision, stable object IDs, prepared authoring bundle, and actual host commits. Prevents already-committed changes from being replayed.',
+      'Plans real transparent cutouts, replacement candidates, presets, and text options before authoring. Delegates ready preparation to the collage executor and separates new generation requests from deterministic edits.',
+      'Defines object controls backed by prepared options: transforms, ordering, typography, replacement, additions, and removal. Binds Apply, Add, and Remove to concrete authorized operations.',
+      'Renders controls in the persistent Artifact Canvas. Uses host selection and reversible previews, returning decisions or actual commit results without generating assets on a control click.',
+    ],
+  },
+  {
+    input: 'A chart, visualization, or tabular dataset', output: 'An evidence-grounded structured report',
+    caseId: 'inflak-pN9-chart-analysis-instruction',
+    layers: [
+      'Keeps source evidence immutable while tracking analysis preferences and report revisions. Separates observed values from uncertain labels, missing data, and user decisions.',
+      'Identifies material ambiguity in evidence or analysis direction. Hands the confirmed task to the report-generation skill using the active host model; brief and composer interactions are optional, not mandatory gates.',
+      'Specifies grounded analysis-direction choices and, when needed, brief customization or report composition. Makes source support and uncertainty explicit in the interaction contract.',
+      'Renders conversational analysis controls and returns selections to L1. The host generates and persists the structured report; the Renderer does not invent data or author its conclusions.',
+    ],
+  },
+  {
+    input: 'An SVG artifact; no initial prompt required', output: 'Confirmed instructions and a validated SVG revision',
+    caseId: 'inflak-pN10-svg-refinement-instruction',
+    layers: [
+      'Binds artifact-first analysis to a source revision and stable objects. Preserves suggestions, accepted or rejected decisions, typed instruction values, and resulting revision evidence.',
+      'Prepares artifact-grounded suggestions, resolves their targets and operations, and plans execution only for the concretely confirmed instruction. The SVG instruction executor applies the authorized scope in separate passes.',
+      'Defines object-anchored suggestion review, relationships, and operation editing as instruction values. Final confirmation authorizes only the displayed accepted or edited scope.',
+      'Renders these instruction widgets on the persistent canvas while keeping the source read-only during review. Returns semantic choices, not immediate SVG patches.',
+    ],
+  },
+  {
+    input: 'An existing prompt and its SVG artifact', output: 'A grounded enhancement and validated SVG changes',
+    caseId: 'inflak-pN11-svg-prompt-enhancement',
+    layers: [
+      'Preserves the exact original prompt, source revision, named concepts, ambiguous references, and action spans. Tracks target-bound approvals without resolving pronouns by proximity.',
+      'Resolves each prompt reference against inspected objects and requires concrete operation parameters and constraints. Sends approved work to the prompt-refinement executor without an extra aggregate approval gate.',
+      'Defines object-grounded clarification and action approval, linking each choice to its prompt span and actual target. Viewing, prefilling, or editing alone is not approval.',
+      'Implements clarification and approval widgets on Artifact Canvas using host hit testing and placement. Returns instruction decisions, never directly authored artifact patches.',
+    ],
+  },
+  {
+    input: 'A refinement prompt and current SVG', output: 'An accepted new artifact revision',
+    caseId: 'inflak-pN12-interactive-svg-refinement',
+    layers: [
+      'Tracks the exact prompt, current SVG, candidate identity, interaction binding, and committed revision. Merges real host commits without executing them a second time.',
+      'Grounds intended targets in the scene and prepares a real preview. Selects a palette for color changes or a spatial board for composition, and authorizes execution only from current-revision Apply evidence.',
+      'Defines task-specific controls and reversible preview semantics. Adjust and Reset remain transient; Regenerate, Reject, or Dismiss never authorize a patch.',
+      'Implements artifact controls using authoritative host previews and layout drafts. Returns Apply or commit evidence for validation and acceptance; no augmented-instruction compilation or export is involved.',
+    ],
+  },
+  {
+    input: 'The current request and conversation context', output: 'Execution of a confirmed next action',
+    caseId: 'inflak-pN13-proactive-intent-recommendation',
+    layers: [
+      'Separates explicit observations from inferred goals. Keeps the selected recommendation, implementation inputs, and actual execution outcome, rather than ending when a choice is clicked.',
+      'Infers feasible next actions and offers two to five distinct possibilities, or one discriminating question when intent is unclear. Resolves implementation needs and executes the confirmed task with the active model within real capabilities.',
+      'Defines an intention-choice widget with optional freeform input, or a task-grounded implementation widget for parameters, editable content, review, or spatial evidence.',
+      'Renders concise conversational choices and selected implementation controls. Returns user intent without displaying a ranking dossier, silently switching plugins, or executing an unconfirmed recommendation.',
+    ],
+  },
+]
+const demoPlugins = [
+  {
+    id: 'main', name: 'Multimodal Co-Creation', category: 'Text + image',
+    caseId: 'inflak-main',
+    description: 'Write a story, shape its visual direction, and create the cover in one connected conversation. Task-specific interactions keep your intent and artifacts in context.',
+    input: 'A writing or image brief', output: 'Text and image artifacts', directory: 'inflak-main',
+    layers: [
+      'Reconstructs intent, artifacts, and previous returns. Routes to writing, revision, prompt enhancement, image generation, or image editing.',
+      'One of five task planners identifies the next unresolved choice, such as audience or composition. Selects a suitable widget, or directly invokes the model or image tool when ready.',
+      'One of six widget-design skills defines the selected form, selector, editor, canvas, or parameter controls: what to show, what the user can change, and what to return.',
+      'Implements that contract as a sandboxed widget and returns the submitted values to the Router. It does not write the story or generate the image.',
+    ],
+  },
+  {
+    id: 'collage', name: 'Collage Authoring', category: 'Persistent artifacts',
+    caseId: 'inflak-svg-authoring',
+    description: 'Create an SVG composition, inspect its objects, and refine it through direct manipulation and guided revision. Each step builds on the same evolving artifact.',
+    input: 'A composition brief or SVG', output: 'A revised SVG composition', directory: 'inflak-collage-authoring',
+    layers: [
+      'Tracks the canonical SVG, its revision, and stable object IDs. Routes creation, artifact analysis, prompt grounding, or refinement without losing earlier decisions.',
+      'Determines which material choice or object-level intent remains unresolved. Selects an interaction, or hands a ready, authorized plan to the collage execution skill.',
+      'Designs the selected artifact-grounded interaction: object references, editable properties, proposals, and the precise meaning of an Apply or review decision.',
+      'Renders the interaction in the persistent Artifact Canvas. The host manages previews and atomic commits; the Renderer returns interaction results without executing image tools.',
+    ],
+  },
+  {
+    id: 'paradigms', name: 'Interaction Paradigms', category: '13 focused plugins',
+    caseId: paradigmDetails[2]!.caseId,
+    description: 'Explore thirteen independent plugins, from organizing a prompt to refining an artifact and reviewing proactive suggestions. Each supplies its own task-specific four-layer skills.',
+    input: paradigmDetails[2]!.input, output: paradigmDetails[2]!.output, directory: '',
+    layers: paradigmDetails[2]!.layers,
+  },
+  {
+    id: 'author', name: 'Inflak Authoring', category: 'Plugin authoring',
+    caseId: '',
+    description: 'Describe the human-agent collaboration you need. Develop a four-layer plugin through conversation, preview its interactions, and validate it before publication.',
+    input: 'A collaboration description', output: 'A validated plugin package', directory: 'inflak-author',
+    layers: [
+      'Reconstructs the current authoring revision and merges approved design decisions. Tracks the workflow, generated build, and exact preview approved for publication.',
+      'Resolves one authoring gap at a time: task framing, a workflow stage, artifact flow, or interaction design. Once ready, selects an executor for building, validation, or publication.',
+      'Uses eight Author-specific design skills to specify framing boards, workflow reviews, artifact-flow maps, interaction previews, resource intake, and build reviews.',
+      'Renders those review interfaces and returns the author\'s decisions unchanged to the Router. Compilation and publication run through the execution skill, not the Renderer.',
+    ],
+  },
+]
 const icon = (name: string) => `<i data-lucide="${name === 'github' ? 'book-open' : name}" aria-hidden="true"></i>`
 const mainPlanners = [
   { id: 'writing-draft', name: 'Writing draft', purpose: 'Create new text' },
@@ -57,7 +255,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <a class="nav-home" href="#" aria-current="page">Overview</a>
       <a href="#architecture">Architecture</a>
       <a href="${gallery}">Case gallery ${icon('arrow-up-right')}</a>
-      <a href="${organization}/Inflak-demo">Inflak-demo ${icon('arrow-up-right')}</a>
+      <a href="#demo">Demo &amp; Plugins</a>
       <a class="nav-github" href="${organization}">${icon('github')} GitHub</a>
     </nav>
     <button class="icon-button menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="navigation" title="Open navigation">${icon('menu')}</button>
@@ -67,8 +265,9 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <div class="hero-content">
         <h1 id="hero-title">Inflak<span class="title-period">.</span></h1>
         <p class="hero-subtitle">Human-agent interaction,<br><em>orchestrated.</em></p>
-        <p class="hero-description">The right interaction, at the right moment.<br>A unified architecture for agents that work with people.</p>
-        <div class="hero-actions"><a class="button button-primary" href="${gallery}">Explore the gallery ${icon('arrow-up-right')}</a><button class="button button-secondary" type="button" data-video="overview" aria-haspopup="dialog">${icon('play')} Watch overview</button><a class="text-link" href="#architecture">Meet the architecture ${icon('arrow-down')}</a></div>
+        <p class="hero-description">A unified architecture for agents that work with people.</p>
+        <div class="hero-actions"><a class="button button-primary" href="${gallery}">Explore the gallery ${icon('arrow-up-right')}</a><a class="button button-primary" href="#demo">Explore the demo ${icon('arrow-down')}</a></div>
+        <button class="text-link hero-overview" type="button" data-video="overview" aria-haspopup="dialog">${icon('play')} Watch overview</button>
       </div>
       <div class="examples-carousel" role="region" aria-roledescription="carousel" aria-label="Inflak examples">
         <div class="examples-viewport" id="examples-viewport" tabindex="0" role="group" aria-label="Example slides">
@@ -108,13 +307,13 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <div class="container section">
         <div class="section-heading"><p class="eyebrow">02 / The implementation</p><span class="section-note">Agent-native. Skill-based. Composable.</span></div>
         <div class="implementation-intro">
-          <div><h2 id="implementation-title">Inflak Main</h2><p class="implementation-subtitle">The architecture, packaged as skills.</p></div>
-          <div class="implementation-summary"><p>A co-creation plugin with five task planners and six reusable widget designs. One Router coordinates the task; one Renderer realizes the selected interaction.</p><a class="text-link" href="${sourceRepository}">View Inflak Main on GitHub ${icon('arrow-up-right')}</a></div>
+          <div><h2 id="implementation-title">Multimodal Co-Creation</h2><p class="implementation-subtitle">The architecture, packaged as skills.</p></div>
+          <div class="implementation-summary"><p>A co-creation plugin with five task planners and six reusable widget designs. One Router coordinates the task; one Renderer realizes the selected interaction.</p><a class="text-link" href="${sourceRepository}">View Multimodal Co-Creation on GitHub ${icon('arrow-up-right')}</a></div>
         </div>
         <div class="implementation-map-heading"><h3>Different tasks, shared widgets.</h3><span>5 planners / 6 widget designs</span></div>
         <div class="compatibility-scroll" tabindex="0" role="region" aria-label="Planner and widget compatibility">
           <table class="compatibility-table">
-            <caption class="implementation-sr-only">Registered widget compatibility for the five Inflak Main task planners</caption>
+            <caption class="implementation-sr-only">Registered widget compatibility for the five Multimodal Co-Creation task planners</caption>
             <thead><tr><th scope="col">Task planner</th>${mainWidgets.map((widget) => `<th scope="col">${widget.name}</th>`).join('')}</tr></thead>
             <tbody>${mainPlanners.map((planner) => `<tr><th scope="row"><span>${planner.name}</span><small>${planner.purpose}</small></th>${mainWidgets.map((widget) => `<td class="${widget.planners.includes(planner.id) ? 'widget-supported' : 'widget-unregistered'}">${icon(widget.planners.includes(planner.id) ? 'check' : 'minus')}<span class="implementation-sr-only">${widget.planners.includes(planner.id) ? 'Registered' : 'Not registered'}</span></td>`).join('')}</tr>`).join('')}</tbody>
           </table>
@@ -125,7 +324,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
           <a href="${sourceRepository}/tree/main/registry"><span class="package-name">${icon('file-json')}<code>registry/</code>${icon('arrow-up-right')}</span><strong>Explicit registrations</strong><p>Planner, widget, and tool definitions connect the available capabilities.</p></a>
           <a href="${sourceRepository}/tree/main/contract"><span class="package-name">${icon('files')}<code>contract/</code>${icon('arrow-up-right')}</span><strong>Shared contracts</strong><p>Cross-layer definitions support skill authoring and review.</p></a>
         </div>
-        <p class="implementation-host"><strong>Inside a compatible agent host.</strong> The host provides the model, registered tools, sandboxed rendering, and widget-return bridge. Inflak Main supplies the orchestration skills, not a standalone agent application.</p>
+        <p class="implementation-host"><strong>Inside a compatible agent host.</strong> The host provides the model, registered tools, sandboxed rendering, and widget-return bridge. Multimodal Co-Creation supplies the orchestration skills, not a standalone agent application.</p>
       </div>
     </section>
     <section class="practice-band" id="in-practice" aria-labelledby="practice-title">
@@ -134,10 +333,10 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         <h2 id="practice-title">Different tasks.<br><em>The same foundation.</em></h2>
         <div class="case-grid">
           <article class="case">
-            <button class="case-visual" type="button" data-video="main" aria-haspopup="dialog" aria-label="Watch InFlak Main video"><img src="${asset('co-creation-preview.webp')}" alt="A draggable book-cover layout next to the generated Friendship Garden cover" width="1000" height="650" loading="lazy"><span class="expand-icon">${icon('play')}</span></button>
+            <button class="case-visual" type="button" data-video="main" aria-haspopup="dialog" aria-label="Watch Multimodal Co-Creation video"><img src="${asset('co-creation-preview.webp')}" alt="A draggable book-cover layout next to the generated Friendship Garden cover" width="1000" height="650" loading="lazy"><span class="expand-icon">${icon('play')}</span></button>
             <div class="case-meta"><span class="eyebrow">Case study / 01</span><span class="case-tag blue">Text + image</span></div>
             <h3>From a story to its world.</h3><p>A writing brief becomes a story, then a book cover. Structured forms and a draggable layout board bring different kinds of human input into one connected creative process.</p>
-            <button class="text-link" type="button" data-video="main" aria-haspopup="dialog">Watch InFlak Main ${icon('play')}</button>
+            <button class="text-link" type="button" data-video="main" aria-haspopup="dialog">Watch Multimodal Co-Creation ${icon('play')}</button>
           </article>
           <article class="case">
             <button class="case-visual" type="button" data-video="collage" aria-haspopup="dialog" aria-label="Watch SVG Collage Authoring video"><img src="${asset('collage-preview.webp')}" alt="Inflak's collage authoring interface with a visual composition and editable typography controls" width="1000" height="650" loading="lazy"><span class="expand-icon">${icon('play')}</span></button>
@@ -146,6 +345,28 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
             <button class="text-link" type="button" data-video="collage" aria-haspopup="dialog">Watch SVG Collage Authoring ${icon('play')}</button>
           </article>
         </div>
+      </div>
+    </section>
+    <section class="demo-band" id="demo" aria-labelledby="demo-title">
+      <div class="container section">
+        <div class="section-heading"><p class="eyebrow">04 / Demo &amp; Plugins</p><span class="section-note">One workspace. Different ways to collaborate.</span></div>
+        <div class="demo-intro">
+          <h2 id="demo-title">Inflak Demo</h2>
+          <div><p>A runnable workspace for exploring Inflak plugins, bringing conversation, interactive widgets, and artifacts into one agent interface.</p><div class="demo-actions"><a class="button button-primary" href="${demoRepository}#install-on-another-machine">Run locally ${icon('arrow-up-right')}</a><a class="text-link" href="${demoRepository}">View source ${icon('arrow-up-right')}</a></div></div>
+        </div>
+        <div class="demo-facts"><span><strong>17</strong> registered plugins</span><span><strong>13</strong> interaction paradigms</span><span>Copilot SDK host + web interface</span></div>
+        <div class="plugin-layout">
+          <div class="plugin-tabs" role="tablist" aria-label="Demo plugins" aria-orientation="vertical">${demoPlugins.map((plugin, index) => `<button class="plugin-tab" id="plugin-tab-${plugin.id}" role="tab" aria-selected="${index === 0}" aria-controls="plugin-panel-${plugin.id}" tabindex="${index === 0 ? 0 : -1}" data-plugin="${index}"><span class="plugin-number">0${index + 1}</span><span><strong>${plugin.name}</strong><small>${plugin.category}</small></span>${icon('arrow-right')}</button>`).join('')}</div>
+          <div class="plugin-panels">${demoPlugins.map((plugin, index) => `<div class="plugin-panel" id="plugin-panel-${plugin.id}" role="tabpanel" aria-labelledby="plugin-tab-${plugin.id}" tabindex="0" ${index === 0 ? '' : 'hidden'}>
+            <p class="eyebrow">${plugin.category}</p><h3>${plugin.name}</h3><p class="plugin-description">${plugin.description}</p>
+            ${plugin.id === 'paradigms' ? `<div class="paradigm-picker"><label for="paradigm-select">Interaction paradigm</label><select id="paradigm-select">${paradigms.map((paradigm, paradigmIndex) => `<option value="${paradigmIndex}" ${paradigmIndex === 2 ? 'selected' : ''}>P${paradigmIndex + 1} / ${paradigm.name}</option>`).join('')}</select><p id="paradigm-description" aria-live="polite">${paradigms[2]!.description}</p><a class="text-link" id="paradigm-source" href="${demoRepository}/tree/main/plugins/inflak-pN3-${paradigms[2]!.slug}">View P3 source ${icon('arrow-up-right')}</a></div>` : ''}
+            <dl class="plugin-layers" aria-label="Four-layer skill responsibilities">${plugin.layers.map((description, layerIndex) => `<div><dt><span>L${layerIndex + 1}</span>${layers[layerIndex]!.name}</dt><dd>${description}</dd></div>`).join('')}</dl>
+            <div class="contract"><div><span>Input</span><strong>${plugin.input}</strong></div>${icon('arrow-down')}<div><span>Output</span><strong>${plugin.output}</strong></div></div>
+            <div class="plugin-links">${plugin.directory ? `<a class="text-link" href="${demoRepository}/tree/main/plugins/${plugin.directory}">View plugin source ${icon('arrow-up-right')}</a>` : ''}${plugin.caseId ? `<a class="text-link" ${plugin.id === 'paradigms' ? 'id="paradigm-case"' : ''} href="${galleryCase(plugin.caseId)}">View gallery case ${icon('arrow-up-right')}</a>` : ''}</div>
+            ${plugin.id === 'author' ? `<section class="author-example" aria-labelledby="author-example-title"><p class="eyebrow">Created with Inflak Authoring</p><h4 id="author-example-title">Daily Paper Conclusion</h4><p>An Author-generated plugin that turns recent public arXiv cs.HC papers into an evidence-linked daily digest.</p><dl class="plugin-layers"><div><dt><span>L1</span>Router</dt><dd>Tracks paper scope, source evidence, digest revisions, and acceptance. Changed scope or evidence invalidates dependent conclusions.</dd></div><div><dt><span>L2</span>Planner</dt><dd>Checks collection, paper evidence, and synthesis dependencies. Uses the active host model for collection and writing, and requests human judgment where evidence or direction remains unresolved.</dd></div><div><dt><span>L3</span>Designer</dt><dd>Defines five interactions: scope setup, collection review, paper inspection, synthesis direction, and digest acceptance.</dd></div><div><dt><span>L4</span>Renderer</dt><dd>Implements those review contracts and returns decisions to L1. It does not invent papers, write conclusions, or treat export as acceptance.</dd></div></dl><a class="text-link" href="${demoRepository}/tree/main/plugins/inflak-daily-paper-conclusion">View generated plugin ${icon('arrow-up-right')}</a></section>` : ''}
+          </div>`).join('')}</div>
+        </div>
+        <p class="demo-requirements"><strong>Run on your machine.</strong> Requires Python 3.11+, Node.js 18+, and GitHub CLI authenticated with a Copilot-enabled account. Image generation also requires a configured image provider.</p>
       </div>
     </section>
   </main>
@@ -190,6 +411,47 @@ carouselRegion.addEventListener('keydown', (event) => {
 carousel.on('select', syncCarousel).on('reInit', syncCarousel).on('slidesInView', syncCarousel)
 syncCarousel()
 import.meta.hot?.dispose(() => carousel.destroy())
+
+const pluginTabs = [...document.querySelectorAll<HTMLButtonElement>('.plugin-tab')]
+function selectPlugin(index: number) {
+  pluginTabs.forEach((tab, tabIndex) => {
+    const selected = tabIndex === index
+    tab.setAttribute('aria-selected', String(selected))
+    tab.tabIndex = selected ? 0 : -1
+    document.getElementById(tab.getAttribute('aria-controls')!)!.hidden = !selected
+  })
+}
+pluginTabs.forEach((tab, index) => {
+  tab.addEventListener('click', () => selectPlugin(index))
+  tab.addEventListener('keydown', (event) => {
+    let next = index
+    if (event.key === 'ArrowDown' || event.key === 'ArrowRight') next = (index + 1) % pluginTabs.length
+    else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') next = (index - 1 + pluginTabs.length) % pluginTabs.length
+    else if (event.key === 'Home') next = 0
+    else if (event.key === 'End') next = pluginTabs.length - 1
+    else return
+    event.preventDefault()
+    selectPlugin(next)
+    pluginTabs[next]!.focus()
+  })
+})
+document.querySelector<HTMLSelectElement>('#paradigm-select')!.addEventListener('change', (event) => {
+  const index = Number((event.currentTarget as HTMLSelectElement).value)
+  const paradigm = paradigms[index]!
+  document.querySelector('#paradigm-description')!.textContent = paradigm.description
+  const link = document.querySelector<HTMLAnchorElement>('#paradigm-source')!
+  link.href = `${demoRepository}/tree/main/plugins/inflak-pN${index + 1}-${paradigm.slug}`
+  link.innerHTML = `View P${index + 1} source ${icon('arrow-up-right')}`
+  const details = paradigmDetails[index]!
+  document.querySelector<HTMLAnchorElement>('#paradigm-case')!.href = galleryCase(details.caseId)
+  document.querySelectorAll('#plugin-panel-paradigms > .plugin-layers dd').forEach((element, layerIndex) => {
+    element.textContent = details.layers[layerIndex]!
+  })
+  const values = document.querySelectorAll('#plugin-panel-paradigms > .contract strong')
+  values[0]!.textContent = details.input
+  values[1]!.textContent = details.output
+  refreshIcons()
+})
 
 const tabs = [...document.querySelectorAll<HTMLButtonElement>('.layer-tab')]
 const panel = document.querySelector<HTMLDivElement>('#layer-panel')!
