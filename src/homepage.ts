@@ -250,7 +250,7 @@ const layers = [
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header">
-    <a class="brand" href="#" aria-label="Inflak home"><img src="${asset('icon.png')}" alt="Inflak" width="142" height="44"></a>
+    <a class="brand" href="#" aria-label="Inflak home"><img src="${asset('icon.png?v=20261013-transparent')}" alt="Inflak" width="142" height="44"></a>
     <nav id="navigation" aria-label="Primary navigation">
       <a class="nav-home" href="#" aria-current="page">Overview</a>
       <a href="#architecture">Architecture</a>
@@ -370,7 +370,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       </div>
     </section>
   </main>
-  <footer class="container site-footer"><a class="brand" href="#" aria-label="Back to top"><img src="${asset('icon.png')}" alt="Inflak" width="118" height="37" loading="lazy"></a><p>Human-agent interaction, orchestrated.</p><a class="text-link" href="#">Back to top ${icon('arrow-up-right')}</a></footer>
+  <footer class="container site-footer"><a class="brand" href="#" aria-label="Back to top"><img src="${asset('icon.png?v=20261013-transparent')}" alt="Inflak" width="118" height="37" loading="lazy"></a><p>Human-agent interaction, orchestrated.</p><a class="text-link" href="#">Back to top ${icon('arrow-up-right')}</a></footer>
   <dialog class="figure-dialog" aria-labelledby="figure-title">
     <div class="dialog-header"><div><p class="eyebrow">Inflak / A closer look</p><h2 id="figure-title"></h2></div><button class="icon-button dialog-close" aria-label="Close figure" title="Close figure">${icon('x')}</button></div>
     <div class="figure-scroll" tabindex="0" role="region" aria-label="Figure detail"><img id="figure-image" alt=""></div>
