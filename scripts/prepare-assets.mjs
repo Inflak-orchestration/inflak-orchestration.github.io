@@ -7,7 +7,7 @@ if (!sourceArgument || !logoArgument) throw new Error('Usage: node scripts/prepa
 const source = resolve(sourceArgument)
 const output = resolve('public/assets')
 await mkdir(output, { recursive: true })
-await copyFile(resolve(logoArgument), join(output, 'inflak-logo.png'))
+await copyFile(resolve(logoArgument), join(output, 'icon.png'))
 const logo = await sharp(logoArgument).metadata()
 const logoSymbol = await sharp(logoArgument)
   .extract({ left: 0, top: 0, width: Math.round(logo.width * 0.48), height: logo.height })
