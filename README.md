@@ -42,7 +42,7 @@ No GitHub repository is created and nothing is published by running this project
 - The asset script accepts PNG renderings named `gallery_main.png`, `gallery_collage.png`, `walkthrough_case.png`, and `gallery_overview_3x4.png`, plus the gallery logo. An optional third argument supplies a higher-resolution rendering of `figures/gallery_overview_3x4.pdf` for the widget crops:
 
 ```sh
-node scripts/prepare-assets.mjs /path/to/rendered-figures /path/to/icon.png /path/to/high-resolution-gallery-overview.png
+node scripts/prepare-assets.mjs /path/to/rendered-figures /path/to/icon.svg /path/to/high-resolution-gallery-overview.png
 ```
 
 To regenerate the overview MP4 on macOS, run this from the project root with a fresh output path:
