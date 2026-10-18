@@ -4,12 +4,13 @@ import '@fontsource/dm-sans/600.css'
 import '@fontsource/dm-sans/700.css'
 import '@fontsource/newsreader/500.css'
 import '@fontsource/newsreader/500-italic.css'
-import { createIcons, ArrowUpRight, ArrowRight, ArrowLeft, ArrowDown, BookOpen, Menu, X, Maximize2, ZoomIn, ZoomOut, Play, Check, Minus, Folder, FileJson, Files } from 'lucide'
+import { createIcons, Images, PanelsTopLeft, ArrowUpRight, ArrowRight, ArrowLeft, ArrowDown, BookOpen, Menu, X, Maximize2, ZoomIn, ZoomOut, Play, Check, Minus, Folder, FileJson, Files } from 'lucide'
 import EmblaCarousel from 'embla-carousel'
 import './homepage.css'
 
 const asset = (name: string) => `${import.meta.env.BASE_URL}assets/${name}`
 const gallery = 'https://inflak-orchestration.github.io/Inflak-gallery/'
+const paper = '/assets/paper.pdf'
 const mainVideo = new URL('data/gallery_cases/clips/inflak-main.mp4', gallery).href
 const collageVideo = new URL('data/gallery_cases/clips/inflak-svg-collage-authoring.mp4', gallery).href
 const recordings = {
@@ -256,6 +257,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <a href="#architecture">Architecture</a>
       <a href="${gallery}">Case gallery ${icon('arrow-up-right')}</a>
       <a href="#demo">Demo &amp; Plugins</a>
+      <a href="${paper}" target="_blank" rel="noopener noreferrer">Paper ${icon('arrow-up-right')}</a>
       <a class="nav-github" href="${organization}">${icon('github')} GitHub</a>
     </nav>
     <button class="icon-button menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="navigation" title="Open navigation">${icon('menu')}</button>
@@ -266,7 +268,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         <h1 id="hero-title">Inflak<span class="title-period">.</span></h1>
         <p class="hero-subtitle">Human-agent interaction,<br><em>orchestrated.</em></p>
         <p class="hero-description">A unified architecture for agents that work with people.</p>
-        <div class="hero-actions"><a class="button button-primary" href="${gallery}">Explore the gallery ${icon('arrow-up-right')}</a><a class="button button-primary" href="#demo">Explore the demo ${icon('arrow-down')}</a></div>
+        <div class="hero-actions"><a class="button button-primary" href="${gallery}">${icon('images')} Explore the gallery ${icon('arrow-up-right')}</a><a class="button button-primary" href="#demo">${icon('panels-top-left')} Explore the demo ${icon('arrow-down')}</a><a class="button button-primary" href="${paper}" target="_blank" rel="noopener noreferrer">${icon('book-open')} Read the paper ${icon('arrow-up-right')}</a></div>
         <button class="text-link hero-overview" type="button" data-video="overview" aria-haspopup="dialog">${icon('play')} Watch overview</button>
       </div>
       <div class="examples-carousel" role="region" aria-roledescription="carousel" aria-label="Inflak examples">
@@ -384,7 +386,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   </dialog>
 `
 
-const refreshIcons = () => createIcons({ icons: { ArrowUpRight, ArrowRight, ArrowLeft, ArrowDown, BookOpen, Menu, X, Maximize2, ZoomIn, ZoomOut, Play, Check, Minus, Folder, FileJson, Files } })
+const refreshIcons = () => createIcons({ icons: { Images, PanelsTopLeft, ArrowUpRight, ArrowRight, ArrowLeft, ArrowDown, BookOpen, Menu, X, Maximize2, ZoomIn, ZoomOut, Play, Check, Minus, Folder, FileJson, Files } })
 const viewport = document.querySelector<HTMLElement>('.examples-viewport')!
 const carousel = EmblaCarousel(viewport, { loop: true, align: 'start', slidesToScroll: 1 })
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
