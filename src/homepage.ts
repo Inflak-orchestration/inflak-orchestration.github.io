@@ -10,7 +10,7 @@ import './homepage.css'
 
 const asset = (name: string) => `${import.meta.env.BASE_URL}assets/${name}`
 const gallery = 'https://inflak-orchestration.github.io/Inflak-gallery/'
-const paper = '/assets/paper.pdf'
+const paper = asset('paper.pdf')
 const mainVideo = new URL('data/gallery_cases/clips/inflak-main.mp4', gallery).href
 const collageVideo = new URL('data/gallery_cases/clips/inflak-svg-collage-authoring.mp4', gallery).href
 const recordings = {

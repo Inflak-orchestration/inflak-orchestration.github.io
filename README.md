@@ -34,6 +34,7 @@ No GitHub repository is created and nothing is published by running this project
 
 - Visual reference and original logo: [Inflak-gallery](https://github.com/Inflak-orchestration/Inflak-gallery).
 - Fonts: Newsreader and DM Sans, distributed locally through Fontsource. Icons: Lucide.
+- The navigation **Paper** and hero **Read the paper** links open the supplied PDF at `public/assets/paper.pdf` in a new tab. No arXiv link is exposed. The neutral filename does not guarantee that the PDF's contents or metadata are anonymous.
 - The example carousel uses Embla with looping, dragging/swiping, arrow controls, and position dots. Images share 4:3 frames with contained artwork; there is no autoplay, stretching, or content cropping. Selecting an image opens the figure viewer.
 - Carousel examples showcase five distinct widget types from the supplied gallery overview: keyword grid, block composer, sketch canvas, embedded selectors, and object controls. The two case-study videos remain separate from this widget showcase.
 - The hero's **Watch overview** button opens `public/assets/inflak-overview.mp4` in the in-page video viewer. This 3:38 recording was remuxed from the supplied `inflak.mov` without re-encoding its H.264 video or AAC audio. The fast-start MP4 is about 77 MB and is requested only after opening the viewer. The original MOV is not included or modified.

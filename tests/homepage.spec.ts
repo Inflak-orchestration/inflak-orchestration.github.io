@@ -33,10 +33,16 @@ test('hero gives gallery and demo equal prominence with a secondary overview', a
   await expect(gallery).toHaveAttribute('href', 'https://inflak-orchestration.github.io/Inflak-gallery/')
   await expect(demo).toHaveAttribute('href', '#demo')
   await expect(hero.locator('.hero-actions .button-primary')).toHaveCount(3)
-  for (const link of [hero.getByRole('link', { name: 'Read the paper' }), page.locator('#navigation a').filter({ hasText: /^Paper/ })]) {
+  for (const link of [hero.getByRole('link', { name: 'Read the paper' }), page.locator('#navigation').getByRole('link', { name: 'Paper', exact: true, includeHidden: true })]) {
     await expect(link).toHaveAttribute('href', '/assets/paper.pdf')
     await expect(link).toHaveAttribute('target', '_blank')
+    await expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   }
+  const paperResponse = await page.request.get('/assets/paper.pdf')
+  expect(paperResponse.ok()).toBe(true)
+  expect(paperResponse.headers()['content-type']).toContain('application/pdf')
+  expect((await paperResponse.body()).subarray(0, 5).toString()).toBe('%PDF-')
+  await expect(page.locator('a[href*="arxiv.org"]')).toHaveCount(0)
   await expect(hero.getByRole('link', { name: 'Meet the architecture' })).toHaveCount(0)
   await expect(hero.locator('.hero-description')).toHaveText('A unified architecture for agents that work with people.')
   for (const [width, height] of [[1440, 900], [390, 844], [320, 568]]) {
